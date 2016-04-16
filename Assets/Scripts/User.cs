@@ -2,90 +2,99 @@ using UnityEngine;
 
 public class User : MonoBehaviour
 {
-    public enum UserState
-    {
-        NOTREADY,
-        READY,
-        PLAYING,
-    }
-    public UserState userState = UserState.NOTREADY;
-    public int userid;
-    public bool isLocalPlayer = true;
+    bool isLocal;
+    public bool IsLocal { get { return isLocal; } } 
+    
+    CamCtrl camCtrl;
+    Actor cursor;
+    Actor selection;
+    public Team team;
 
-    public Pawn alpha;
-    public Pawn bravo;
-    public Pawn charlie;
-    
     public Pawn cockpit;
-    
-    Vector3 spawnPosition = Vector3.zero;
-    Quaternion spawnRotation = Quaternion.LookRotation(Vector3.forward, Vector3.up);
     
     public delegate bool InputDelegate(float deltaTime, InputCtrl.InputParams inputs);
     public InputDelegate ProcessInput;
     
     void Awake()
     {
-         GotoState(UserState.NOTREADY);
+        ProcessInput = NoInput;
+        isLocal = GetComponent<InputCtrl>() != null;
     }
     
-    public Vector3 GetSpawnPosition()
+    public void AssignCamera(CamCtrl camCtrl)
     {
-        Vector3 result = spawnPosition;
-        spawnPosition += Vector3.right*5f;
-        return result;
+        this.camCtrl = camCtrl;
     }
     
-    public Quaternion GetSpawnRotation()
+    public void HandleRefStateChange(Referee.RefState state)
     {
-        return spawnRotation;
-    }
-    
-    public void StartGame()
-    {
-        CamCtrl.Ins.pointsOfInterest.Clear();
-        alpha = ActorWorld.Ins.RequestPawn("PawnA",this, Pawn.PawnType.FAT);
-        if(isLocalPlayer)
-        {
-            CamCtrl.Ins.pointsOfInterest.Add(alpha.transform);
-        }
-        bravo = ActorWorld.Ins.RequestPawn("PawnB",this, Pawn.PawnType.TALL);
-        if(isLocalPlayer)
-        {
-            CamCtrl.Ins.pointsOfInterest.Add(bravo.transform);
-        }
-        charlie = ActorWorld.Ins.RequestPawn("PawnC",this, Pawn.PawnType.MED);
-        if(isLocalPlayer)
-        {
-            CamCtrl.Ins.pointsOfInterest.Add(charlie.transform);
-        }
-        GotoState(UserState.PLAYING);
-    }
-    
-    void GotoState(UserState state)
-    {
-        userState = state;
         switch(state)
         {
-            case UserState.NOTREADY: 
-                ProcessInput = NotReadyInput; 
+            case Referee.RefState.SIDESELECT: 
+                this.cursor = camCtrl ? camCtrl.cursor : null;
+                this.selection = camCtrl ? camCtrl.selection : null;
+                if( isLocal )
+                {
+                    camCtrl.pointsOfInterest.Add(cursor.transform);
+                    camCtrl.pointsOfInterest.Add(selection.transform);
+                    ProcessInput = PregameInput;
+                } 
                 break;
-            case UserState.READY:
-                ProcessInput = ReadyInput; 
-                StartGame(); 
+            case Referee.RefState.COUNTDOWN:
+                if( isLocal )
+                {
+                    camCtrl.pointsOfInterest.Clear();
+                    camCtrl.pointsOfInterest.Add(team.alpha.transform);
+                    camCtrl.pointsOfInterest.Add(team.bravo.transform);
+                    camCtrl.pointsOfInterest.Add(team.charlie.transform);
+                }
                 break;
-            case UserState.PLAYING:
-                ProcessInput = PlayingInput; 
+            case Referee.RefState.PLAYING:
+                if( isLocal )
+                {
+                    ProcessInput = PlayingInput;
+                } 
                 break;
         }
     }
     
-    public bool NotReadyInput(float deltaTime, InputCtrl.InputParams inputs)
+    public bool NoInput(float deltaTime, InputCtrl.InputParams inputs)
+    {
+        return false;
+    }
+    
+    
+    public bool PregameInput(float deltaTime, InputCtrl.InputParams inputs)
     {
         if( inputs.primaryButton )
         {
-            GotoState(UserState.READY);
+            Team desiredTeam = null;
+            if( selection.transform.position.z < -1f )
+            {
+                desiredTeam = Referee.Ins.southTeam;
+            }
+            else if( selection.transform.position.z > 1f )
+            {
+                desiredTeam = Referee.Ins.northTeam;
+            } 
+            if( team == desiredTeam )
+            {
+                Referee.Ins.SpeedUp();
+            }  
+            else
+            {
+                if( team != null )
+                {
+                    team.Remove(this);
+                }
+                if( desiredTeam != null )
+                {
+                    desiredTeam.Add(this);
+                }
+            }
+            selection.SetAxis(cursor.transform.position - selection.transform.position);
         }
+        cursor.SetAxis(inputs.leftAxis);
         return true;
     }
     
@@ -100,27 +109,34 @@ public class User : MonoBehaviour
         {
             cockpit.SetAxis(inputs.leftAxis);
             cockpit.DoInput(deltaTime, inputs.primaryButton, inputs.secondaryButton);
+            cursor.SetAxis(Vector2.zero);
         }
+        else
+        {
+            cursor.SetAxis(inputs.leftAxis);
+        }
+        selection.SetAxis(cursor.transform.position - selection.transform.position);
         if( inputs.tertiaryButton )
         {
             if( cockpit == null )
             {
-                cockpit = alpha;
+                cockpit = team.alpha;
             }
-            else if( cockpit == alpha )
+            else if( cockpit == team.alpha )
             {
-                cockpit = bravo;
+                cockpit = team.bravo;
             }
-            else if( cockpit == bravo )
+            else if( cockpit == team.bravo )
             {
-                cockpit = charlie;
+                cockpit = team.charlie;
             }
-            else if( cockpit == charlie )
+            else if( cockpit == team.charlie )
             {
-                cockpit = alpha;
+                cockpit = team.alpha;
             }
-            CamCtrl.Ins.keyInterest = cockpit != null ? cockpit.transform : null;
+            camCtrl.keyInterest = cockpit != null ? cockpit.transform : null;
         }
         return true;
     }
+     
 }

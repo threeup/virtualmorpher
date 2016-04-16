@@ -3,7 +3,12 @@ using UnityEngine;
 public class Actor : MonoBehaviour
 {
     public ActorBody body;
-    public ActorMotor motor;
+    ActorMotor motor;
+    
+    void Awake()
+    {
+        motor = GetComponent<ActorMotor>();
+    }
     
     public virtual void GoAlive()
     {
@@ -19,11 +24,16 @@ public class Actor : MonoBehaviour
     {
         motor.SetVelocity(axis);
     }
+    public void SetAxis(Vector3 axis)
+    {
+        Vector2 adjusted = new Vector2(axis.x, axis.z);
+        motor.SetVelocity(adjusted);
+    }
     
     public void SetVelocityForward(float amount)
     {
-        Vector2 forward = new Vector2(this.transform.forward.x, this.transform.forward.z);
-        motor.SetVelocity(forward * amount);
+        
+        motor.SetVelocity(this.transform.forward * amount);
     }
 
 }

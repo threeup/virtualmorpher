@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: fb1c74b048460774b894ce4d9ff37687
-timeCreated: 1460792295
+guid: cb4ae97e0fe2ec64888838b1cd8763b4
+timeCreated: 1460846508
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -9,7 +9,8 @@ ModelImporter:
     400000: //RootNode
     2300000: //RootNode
     3300000: //RootNode
-    4300000: robohead
+    4300000: Icosphere
+    4300002: orb
     7400000: Default Take
     9500000: //RootNode
   materials:
@@ -70,7 +71,7 @@ ModelImporter:
     rootMotionBoneName: 
     hasTranslationDoF: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 0
+  animationType: 2
   humanoidOversampling: 1
   additionalBone: 0
   userData: 

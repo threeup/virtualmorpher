@@ -1,15 +1,22 @@
 fileFormatVersion: 2
-guid: fb1c74b048460774b894ce4d9ff37687
-timeCreated: 1460792295
+guid: 5bc0f5a05b13ba148b3d1b8685692c69
+timeCreated: 1460845848
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
-    100000: //RootNode
-    400000: //RootNode
-    2300000: //RootNode
-    3300000: //RootNode
-    4300000: robohead
+    100000: arrowhead
+    100002: arrowstem
+    100004: //RootNode
+    400000: arrowhead
+    400002: arrowstem
+    400004: //RootNode
+    2300000: arrowhead
+    2300002: arrowstem
+    3300000: arrowhead
+    3300002: arrowstem
+    4300000: arrowhead
+    4300002: arrowstem
     7400000: Default Take
     9500000: //RootNode
   materials:

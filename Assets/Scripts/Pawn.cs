@@ -10,7 +10,7 @@ public class Pawn : Actor
         MED,
     }
     
-    public User owner;
+    public Team team;
     public PawnType pawnType = PawnType.NONE;
     
     public GameAbility leftHandAbility;

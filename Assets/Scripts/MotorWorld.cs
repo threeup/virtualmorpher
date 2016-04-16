@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 public class MotorWorld : MonoBehaviour {
 
-    public static MotorWorld Ins;
+    public static MotorWorld Ins = null;
     
     public List<IMotor> activeMotors = new List<IMotor>();
 
-	void Awake () 
+	void Awake() 
     {
 	    Ins = this;
 	}
@@ -21,6 +21,11 @@ public class MotorWorld : MonoBehaviour {
     public void Remove(IMotor motor)
     {
         activeMotors.Remove(motor);
+    }
+    
+    public bool Contains(IMotor motor)
+    {
+        return activeMotors.Contains(motor);
     }
     
 	void Update () 

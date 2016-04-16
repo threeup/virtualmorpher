@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class InputCtrl : MonoBehaviour {
 
+    [System.Serializable]
     public struct InputParams 
     {
         public Vector2 leftAxis;
@@ -12,13 +13,17 @@ public class InputCtrl : MonoBehaviour {
         public bool tertiaryButton;
     }
     
-    public static InputCtrl Ins;
-
-    public User localUser;
+    User user;
 
 
-    InputParams inputParams;
-    InputParams lastInputParams;
+    [SerializeField]
+    InputParams inputParams = new InputParams();
+    InputParams lastInputParams = new InputParams();
+    
+    void Awake()
+    {
+        user = GetComponent<User>();
+    }
 
     void Update () 
     {
@@ -56,6 +61,16 @@ public class InputCtrl : MonoBehaviour {
         {
             inputParams.tertiaryButton = true;
         }
-        localUser.ProcessInput(deltaTime, inputParams);
+        if( user == null || user.ProcessInput == null )
+        {
+            Debug.Log(user);
+            Debug.Log(user.ProcessInput);
+            Debug.Log(inputParams);
+        }
+        else
+        {
+            user.ProcessInput(deltaTime, inputParams);    
+        }
+        
 	}
 }

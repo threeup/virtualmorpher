@@ -4,12 +4,14 @@ using System.Collections.Generic;
 
 public class CamCtrl : MonoBehaviour, IMotor {
 
-    public static CamCtrl Ins;
+    public static CamCtrl First;
+    public static CamCtrl Second;
     
     public Transform keyInterest = null;
     public List<Transform> pointsOfInterest = new List<Transform>();
-    public GameObject cursor;
-    Camera mainCam; 
+    public Actor cursor;
+    public Actor selection;
+    Camera localCam; 
     Plane plane = new Plane(Vector3.up, Vector3.zero);
     
     float motorSpeed = 0f;
@@ -26,14 +28,31 @@ public class CamCtrl : MonoBehaviour, IMotor {
     public float maxZoom = 15f;
 
 	// Use this for initialization
-	void Start () {
-	    mainCam = Camera.main;
-        Ins = this;
+	void Awake () {
+	    localCam = this.GetComponent<Camera>();
+        if( First == null )
+        {
+            First = this;
+        }
+        else
+        {
+            Second = this;
+        }
 	}
+    
+    void Start()
+    {
+        cursor = ActorWorld.Ins.CreateItem(ActorWorld.Ins.cursorPrototype, null);
+        selection = ActorWorld.Ins.CreateItem(ActorWorld.Ins.cursorPrototype, null);
+        MotorWorld.Ins.Add(this);
+    }
     
     void OnEnable()
     {
-        MotorWorld.Ins.Add(this);
+        if( MotorWorld.Ins != null && !MotorWorld.Ins.Contains(this))
+        {
+            MotorWorld.Ins.Add(this);
+        }
     }
     
     void OnDisable()
@@ -43,19 +62,18 @@ public class CamCtrl : MonoBehaviour, IMotor {
     
     void ScanInterest()
     {
-        Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
+        Ray ray = localCam.ScreenPointToRay(Input.mousePosition);
         float distance = 0; 
         if (plane.Raycast(ray, out distance))
         {
-             //cursor.transform.position = ray.GetPoint(distance);
+             cursor.transform.position = ray.GetPoint(distance);
         }
-        Vector2 midPoint = new Vector2(mainCam.pixelWidth/2,mainCam.pixelHeight/2);
-        ray = mainCam.ScreenPointToRay(midPoint);
+        Vector2 midPoint = new Vector2(localCam.pixelWidth/2,localCam.pixelHeight/2);
+        ray = localCam.ScreenPointToRay(midPoint);
         if( plane.Raycast(ray, out distance) )
         {
             currentCenter = ray.GetPoint(distance);
         }
-        cursor.transform.position = currentCenter;
         averageInterest = Vector3.zero;
 	    foreach(Transform point in pointsOfInterest)
         {

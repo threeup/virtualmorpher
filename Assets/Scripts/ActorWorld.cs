@@ -4,30 +4,32 @@ using System.Collections.Generic;
 
 public class ActorWorld : MonoBehaviour {
 
-    public static ActorWorld Ins;
+    public static ActorWorld Ins = null;
     
     public List<Pawn> activePawns = new List<Pawn>();
     public List<Actor> activeActors = new List<Actor>();
     
     public GameObject pawnPrototype;
+    public GameObject orbPrototype;
     public GameObject bulletPrototype;
     public GameObject cannonPrototype;
     public GameObject shieldPrototype;
     public GameObject toolPrototype;
     public GameObject roboBodyPrototype;
+    public GameObject cursorPrototype;
     
 
-	void Awake () 
+	void Awake() 
     {
 	    Ins = this;
 	}
     
-    public Pawn RequestPawn(string name, User owner, Pawn.PawnType ptype)
+    public Pawn RequestPawn(string name, Team team, Pawn.PawnType ptype)
     {
-        GameObject pawnObject = GameObject.Instantiate(pawnPrototype, owner.GetSpawnPosition(), owner.GetSpawnRotation()) as GameObject;
+        GameObject pawnObject = GameObject.Instantiate(pawnPrototype, team.GetSpawnPosition(), team.GetSpawnRotation()) as GameObject;
         pawnObject.name = name;
         Pawn pawn = pawnObject.GetComponent<Pawn>();
-        pawn.owner = owner;
+        pawn.team = team;
         pawn.pawnType = ptype;
         GameObject bodyObject = null;
         switch(ptype)
@@ -54,10 +56,21 @@ public class ActorWorld : MonoBehaviour {
         return bullet;
     }
     
+    public Actor RequestOrb(Transform origin)
+    {
+        GameObject orbObject = GameObject.Instantiate(orbPrototype, origin.position, origin.rotation) as GameObject;
+        orbObject.name = orbPrototype.name+"-"+Time.frameCount;
+        Actor orb = orbObject.GetComponent<Actor>();
+        return orb;
+    }
+    
     public Actor CreateItem(GameObject prototype, Transform origin)
     {
         GameObject itemObject = GameObject.Instantiate(prototype, Vector3.zero, Quaternion.identity) as GameObject;
-        itemObject.transform.SetParent(origin, false);
+        if( origin )
+        {
+            itemObject.transform.SetParent(origin, false);
+        }
         itemObject.name = prototype.name+"-"+Time.frameCount;
         Actor item = itemObject.GetComponent<Actor>();
         return item;
