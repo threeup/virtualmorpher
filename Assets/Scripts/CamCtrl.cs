@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 public class CamCtrl : MonoBehaviour, IMotor {
 
+    public static CamCtrl Ins;
+    
+    public Transform keyInterest = null;
     public List<Transform> pointsOfInterest = new List<Transform>();
     public GameObject cursor;
     Camera mainCam; 
@@ -11,7 +14,7 @@ public class CamCtrl : MonoBehaviour, IMotor {
     
     float motorSpeed = 0f;
     public float GetSpeed() { return motorSpeed; }
-    Vector3 motorDirection = Vector3.zero;
+    Vector3 motorDirection = Vector3.forward;
     public Vector3 GetDirection() { return motorDirection; }
     
     Vector3 currentCenter = Vector3.zero;
@@ -25,6 +28,7 @@ public class CamCtrl : MonoBehaviour, IMotor {
 	// Use this for initialization
 	void Start () {
 	    mainCam = Camera.main;
+        Ins = this;
 	}
     
     void OnEnable()
@@ -69,11 +73,18 @@ public class CamCtrl : MonoBehaviour, IMotor {
                 maxDistToInterest = Mathf.Sqrt(sqrMag);
             }
         }
-        
-        Vector3 diff = averageInterest - currentCenter;
+        Vector3 velocity = Vector3.zero;
+        if( keyInterest == null )
+        {
+            velocity = averageInterest - currentCenter;
+        }
+        else
+        {
+            velocity = keyInterest.position - currentCenter;
+        }
         float desiredZoomLevel = Mathf.Clamp( maxDistToInterest, minZoom, maxZoom);
-        diff.y = desiredZoomLevel - currentZoomLevel;
-        SetVelocity(diff);
+        velocity.y = desiredZoomLevel - currentZoomLevel;
+        SetVelocity(velocity);
     }
     
     public void SetVelocity(Vector3 amount)
@@ -88,7 +99,7 @@ public class CamCtrl : MonoBehaviour, IMotor {
         else
         {
             motorSpeed = Mathf.Min(magn, 20);
-            motorDirection = amount/magn;    
+            motorDirection = amount.normalized;    
         }
         
     }
