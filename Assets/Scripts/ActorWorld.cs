@@ -7,11 +7,15 @@ public class ActorWorld : MonoBehaviour {
     public static ActorWorld Ins;
     
     public List<Pawn> activePawns = new List<Pawn>();
+    public List<Actor> activeActors = new List<Actor>();
     
     public GameObject pawnPrototype;
-    public GameObject bodyCannonPrototype;
-    public GameObject bodyShieldPrototype;
-    public GameObject bodyToolPrototype;
+    public GameObject bulletPrototype;
+    public GameObject cannonPrototype;
+    public GameObject shieldPrototype;
+    public GameObject toolPrototype;
+    public GameObject roboBodyPrototype;
+    
 
 	void Awake () 
     {
@@ -28,9 +32,9 @@ public class ActorWorld : MonoBehaviour {
         GameObject bodyObject = null;
         switch(ptype)
         {
-            case Pawn.PawnType.CANNON: bodyObject = GameObject.Instantiate(bodyCannonPrototype) as GameObject; break;
-            case Pawn.PawnType.SHIELD: bodyObject = GameObject.Instantiate(bodyShieldPrototype) as GameObject; break;
-            case Pawn.PawnType.TOOL:   bodyObject = GameObject.Instantiate(bodyToolPrototype) as GameObject; break;
+            case Pawn.PawnType.FAT: bodyObject = GameObject.Instantiate(roboBodyPrototype) as GameObject; break;
+            case Pawn.PawnType.TALL: bodyObject = GameObject.Instantiate(roboBodyPrototype) as GameObject; break;
+            case Pawn.PawnType.MED:   bodyObject = GameObject.Instantiate(roboBodyPrototype) as GameObject; break;
             default: break;
         }
         pawn.body = bodyObject != null ? bodyObject.GetComponent<ActorBody>() : null;
@@ -42,14 +46,39 @@ public class ActorWorld : MonoBehaviour {
         return pawn;
     }
     
+    public Actor RequestBullet(Transform origin)
+    {
+        GameObject bulletObject = GameObject.Instantiate(bulletPrototype, origin.position, origin.rotation) as GameObject;
+        bulletObject.name = bulletPrototype.name+"-"+Time.frameCount;
+        Actor bullet = bulletObject.GetComponent<Actor>();
+        return bullet;
+    }
+    
+    public Actor CreateItem(GameObject prototype, Transform origin)
+    {
+        GameObject itemObject = GameObject.Instantiate(prototype, Vector3.zero, Quaternion.identity) as GameObject;
+        itemObject.transform.SetParent(origin, false);
+        itemObject.name = prototype.name+"-"+Time.frameCount;
+        Actor item = itemObject.GetComponent<Actor>();
+        return item;
+    }
+    
     public void Add(Pawn pawn)
     {
         activePawns.Add(pawn);
+    }
+    public void Add(Actor actor)
+    {
+        activeActors.Add(actor);
     }
     
     public void Remove(Pawn pawn)
     {
         activePawns.Remove(pawn);
+    }
+    public void Remove(Actor actor)
+    {
+        activeActors.Remove(actor);
     }
     
 

@@ -22,6 +22,7 @@ public class InputCtrl : MonoBehaviour {
 
     void Update () 
     {
+        float deltaTime = Time.deltaTime;
         lastInputParams = inputParams;
         inputParams.leftAxis = Vector2.zero;
         inputParams.primaryButton = false;
@@ -55,6 +56,6 @@ public class InputCtrl : MonoBehaviour {
         {
             inputParams.tertiaryButton = true;
         }
-        localUser.ProcessInput(inputParams);
+        localUser.ProcessInput(deltaTime, inputParams);
 	}
 }

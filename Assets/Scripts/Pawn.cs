@@ -1,37 +1,65 @@
 using UnityEngine;
 
-public class Pawn : MonoBehaviour
+public class Pawn : Actor
 {
     public enum PawnType
     {
         NONE,
-        TOOL,
-        SHIELD,
-        CANNON,
+        FAT,
+        TALL,
+        MED,
     }
     
     public User owner;
-    public ActorBody body;
     public PawnType pawnType = PawnType.NONE;
-    public ActorMotor motor;
     
-    public void GoAlive()
+    public GameAbility leftHandAbility;
+    public Actor leftHandItem;
+    public GameAbility rightHandAbility;
+    public Actor rightHandItem;
+    
+    void Awake()
     {
-        ActorWorld.Ins.Add(this);
+        GameAbility[] abs = GetComponents<GameAbility>();
+        if( abs.Length > 0 )
+        {
+            leftHandAbility = abs[0];
+        }
+        if( abs.Length > 1 )
+        {
+            rightHandAbility = abs[1];
+        }
     }
     
-    public void GoDead()
+    public override void GoAlive()
+    {
+        if( leftHandAbility )
+        {
+            leftHandItem = ActorWorld.Ins.CreateItem(ActorWorld.Ins.cannonPrototype, body.leftHand);
+            GameFactory.SetupBullet(leftHandAbility, this, leftHandItem);  
+        }
+        if( rightHandAbility )
+        {
+            rightHandItem = ActorWorld.Ins.CreateItem(ActorWorld.Ins.shieldPrototype, body.rightHand);    
+            GameFactory.SetupShield(rightHandAbility, this, rightHandItem);  
+        }
+        
+        ActorWorld.Ins.Add(this);
+        
+        base.GoAlive();
+    }
+    
+    public override void GoDead()
     {
         ActorWorld.Ins.Remove(this);
+        base.GoDead();
     }
     
-    public void SetAxis(Vector2 axis)
-    {
-        motor.SetVelocity(axis);
-    }
     
-    public void DoInput(bool primary, bool secondary)
+    public void DoInput(float deltaTime, bool primary, bool secondary)
     {
-        //
+        leftHandAbility.ActionUpdate(deltaTime, primary);
+        rightHandAbility.ActionUpdate(deltaTime, secondary);
+        
     }
 }

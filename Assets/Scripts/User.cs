@@ -21,7 +21,7 @@ public class User : MonoBehaviour
     Vector3 spawnPosition = Vector3.zero;
     Quaternion spawnRotation = Quaternion.LookRotation(Vector3.forward, Vector3.up);
     
-    public delegate bool InputDelegate(InputCtrl.InputParams inputs);
+    public delegate bool InputDelegate(float deltaTime, InputCtrl.InputParams inputs);
     public InputDelegate ProcessInput;
     
     void Awake()
@@ -44,17 +44,17 @@ public class User : MonoBehaviour
     public void StartGame()
     {
         CamCtrl.Ins.pointsOfInterest.Clear();
-        alpha = ActorWorld.Ins.RequestPawn("PawnA",this, Pawn.PawnType.SHIELD);
+        alpha = ActorWorld.Ins.RequestPawn("PawnA",this, Pawn.PawnType.FAT);
         if(isLocalPlayer)
         {
             CamCtrl.Ins.pointsOfInterest.Add(alpha.transform);
         }
-        bravo = ActorWorld.Ins.RequestPawn("PawnB",this, Pawn.PawnType.TOOL);
+        bravo = ActorWorld.Ins.RequestPawn("PawnB",this, Pawn.PawnType.TALL);
         if(isLocalPlayer)
         {
             CamCtrl.Ins.pointsOfInterest.Add(bravo.transform);
         }
-        charlie = ActorWorld.Ins.RequestPawn("PawnC",this, Pawn.PawnType.CANNON);
+        charlie = ActorWorld.Ins.RequestPawn("PawnC",this, Pawn.PawnType.MED);
         if(isLocalPlayer)
         {
             CamCtrl.Ins.pointsOfInterest.Add(charlie.transform);
@@ -80,7 +80,7 @@ public class User : MonoBehaviour
         }
     }
     
-    public bool NotReadyInput(InputCtrl.InputParams inputs)
+    public bool NotReadyInput(float deltaTime, InputCtrl.InputParams inputs)
     {
         if( inputs.primaryButton )
         {
@@ -89,17 +89,17 @@ public class User : MonoBehaviour
         return true;
     }
     
-    public bool ReadyInput(InputCtrl.InputParams inputs)
+    public bool ReadyInput(float deltaTime, InputCtrl.InputParams inputs)
     {
         return true;
     }
     
-    public bool PlayingInput(InputCtrl.InputParams inputs)
+    public bool PlayingInput(float deltaTime, InputCtrl.InputParams inputs)
     {
         if( cockpit != null )
         {
             cockpit.SetAxis(inputs.leftAxis);
-            cockpit.DoInput(inputs.primaryButton, inputs.secondaryButton);
+            cockpit.DoInput(deltaTime, inputs.primaryButton, inputs.secondaryButton);
         }
         if( inputs.tertiaryButton )
         {

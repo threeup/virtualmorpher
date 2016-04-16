@@ -3,12 +3,18 @@ using UnityEngine;
 public class ActorBody : MonoBehaviour
 {
     
+    public Transform actionPoint;
+    
     [SerializeField]
     Transform leftArm;
+    
+    public Transform leftHand;
     
     
     [SerializeField]
     Transform rightArm;
+    
+    public Transform rightHand;
     
     
     [SerializeField]
@@ -29,7 +35,10 @@ public class ActorBody : MonoBehaviour
     
     void Update()
     {
-        wheel.Rotate(-Vector3.forward, wheelSpeed * Time.deltaTime);
+        if( wheel )
+        {
+            wheel.Rotate(-Vector3.forward, wheelSpeed * Time.deltaTime);
+        }
     }
     
 }
