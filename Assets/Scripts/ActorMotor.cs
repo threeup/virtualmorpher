@@ -64,11 +64,26 @@ public class ActorMotor : MonoBehaviour, IMotor
             motorDirection = diff.normalized;  
             
             Vector3 nextPosition = this.transform.position + GetDirection()*GetSpeed()*deltaTime;
-            this.transform.position = nextPosition;
+            if( rigbody )
+            {
+                rigbody.MovePosition(nextPosition);
+            }
+            else
+            {
+                this.transform.position = nextPosition;    
+            }
+            
             
             float step = rotationSpeed * deltaTime;
             Vector3 nextDir = Vector3.RotateTowards(this.transform.forward, motorDirection, step, 0.0F);
-            this.transform.rotation = Quaternion.LookRotation(nextDir);
+            if( rigbody )
+            {
+                rigbody.MoveRotation(Quaternion.LookRotation(nextDir));
+            }
+            else
+            {
+                this.transform.rotation = Quaternion.LookRotation(nextDir);
+            }
         }
 
         

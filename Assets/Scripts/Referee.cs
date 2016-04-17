@@ -85,6 +85,7 @@ public class Referee : MonoBehaviour {
                 break;
             case RefState.COUNTDOWN:
                 this.isReady = false;
+                MenuCtrl.Ins.GoSideSelect(false);
                 SetAutoReadyTimer(defaultAdvanceTimer);
                 break;
             case RefState.PLAYING:
