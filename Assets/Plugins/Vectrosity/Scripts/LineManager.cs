@@ -61,6 +61,7 @@ public class LineManager : MonoBehaviour {
 	}
 
 	private void LateUpdate () {
+
 		if (!VectorLine.camTransformExists) return;
 		
 		// Draw3DAuto lines
@@ -125,9 +126,6 @@ public class LineManager : MonoBehaviour {
 	private void OnDestroy () {
 		destroyed = true;
 	}
-	
-	private void OnLevelWasLoaded () {
-		Initialize();
-	}
+
 }
 }

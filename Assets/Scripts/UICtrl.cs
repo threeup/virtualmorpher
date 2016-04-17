@@ -214,7 +214,7 @@ public class UICtrl : MonoBehaviour
         
         if( editPathMode )
         {
-            IntVec2 vec = activeCursor.transform.position.ToIntVec2();
+            //IntVec2 vec = activeCursor.transform.position.ToIntVec2();
             activePath.Clear();
             activePawn.line.points3.Clear();
         }

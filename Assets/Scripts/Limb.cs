@@ -63,7 +63,13 @@ public class Limb : MonoBehaviour
         {
             return;
         }
+        if( otherLimb.owner == null )
+        {
+            Debug.LogError("Detached limb "+other);
+            return;
+        }
         Vector3 diff = otherLimb.transform.position - this.transform.position;
+        
         if( (int)limbType <= (int)otherLimb.limbType )
         {
             ProcessBounce(this, otherLimb, diff);

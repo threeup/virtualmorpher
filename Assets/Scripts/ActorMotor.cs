@@ -135,6 +135,7 @@ public class ActorMotor : MonoBehaviour, IMotor
         
         
         float step = rotationSpeed * deltaTime;
+        motorDirection.y = 0;
         Vector3 nextDir = Vector3.RotateTowards(this.transform.forward, motorDirection, step, 0.0F);
         if( cc )
         {

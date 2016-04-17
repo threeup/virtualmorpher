@@ -120,6 +120,22 @@ public class Team : MonoBehaviour
         Boss.referee.TempFloater(user+" Joined "+this.teamName);
     }
     
+    public void AddAI()
+    {
+        if(users.Count == 0)
+        {
+            for(int i=0; i<Boss.referee.users.Count; ++i)
+            {
+                User u = Boss.referee.users[i];
+                if( u.IsAI && u.team == null )
+                {
+                    u.JoinTeam(this);
+                    return;
+                }
+            }
+        }
+    }
+    
     public void Remove(User user)
     {
         users.Remove(user);
@@ -174,9 +190,9 @@ public class Team : MonoBehaviour
                 UnityEngine.Random.Range(-20,20),
                 UnityEngine.Random.Range(14,20),
                 UnityEngine.Random.Range(-20,20)), ForceMode.Impulse);
-            Boss.actorWorld.garbage.Add(rb.gameObject);
+            Boss.AddGarbage(rb.gameObject);
         }
-        Boss.actorWorld.garbage.Add(actor.gameObject);
+        Boss.AddGarbage(actor.gameObject);
         
     }
     

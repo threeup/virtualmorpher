@@ -5,6 +5,8 @@ public class User : MonoBehaviour
 {
     bool isLocal;
     public bool IsLocal { get { return isLocal; } } 
+    bool isAI;
+    public bool IsAI { get { return isAI; } } 
     
     public CamCtrl camCtrl;
     public UICtrl uiCtrl;
@@ -23,6 +25,7 @@ public class User : MonoBehaviour
     {
         ProcessInput = NoInput;
         isLocal = GetComponent<InputCtrl>() != null;
+        isAI = GetComponent<AICtrl>() != null;
     }
     
     public void AssignCamera(CamCtrl camCtrl)
@@ -64,7 +67,7 @@ public class User : MonoBehaviour
                 }
                 break;
             case Referee.RefState.COUNTDOWN:
-                if( isLocal )
+                if( isLocal && team )
                 {
                     ProcessInput = NoInput;
                     uiCtrl.HideFloater(floorCursor.transform, 0);
@@ -158,7 +161,7 @@ public class User : MonoBehaviour
         }
     }
     
-    void JoinTeam(Team nextTeam)
+    public void JoinTeam(Team nextTeam)
     {
         if( team != null )
         {
@@ -226,26 +229,48 @@ public class User : MonoBehaviour
     {
         if( team && inputs.buttonDown[1] )
         {
+            SelectActor();
             //Pawn lastCockpit = cockpit;
-            if( cockpit == null )
+            
+            if( isLocal )
             {
-                cockpit = team.alpha;
+                uiCtrl.SelectCockpit(cockpit);
+                camCtrl.keyInterest = cockpit != null ? cockpit.transform : null;
             }
-            else if( cockpit == team.alpha )
-            {
-                cockpit = team.bravo;
-            }
-            else if( cockpit == team.bravo )
-            {
-                cockpit = team.charlie;
-            }
-            else if( cockpit == team.charlie )
-            {
-                cockpit = team.alpha;
-            }
-            uiCtrl.SelectCockpit(cockpit);
-            camCtrl.keyInterest = cockpit != null ? cockpit.transform : null;
         }
+    }
+    
+    public void SelectActor()
+    {
+        if( cockpit == null )
+        {
+            cockpit = team.alpha;
+        }
+        else if( cockpit == team.alpha )
+        {
+            cockpit = team.bravo;
+        }
+        else if( cockpit == team.bravo )
+        {
+            cockpit = team.charlie;
+        }
+        else if( cockpit == team.charlie )
+        {
+            cockpit = team.alpha;
+        }
+    }
+    
+    public void MakePath(Vector3 endPoint)
+    {
+        IntVec2 vec = endPoint.ToIntVec2();
+        IntVec2 step = cockpit.transform.position.ToIntVec2();
+        cockpit.path.Clear();
+        while(step.NotAdjacent(vec) && cockpit.path.Count < 20)
+        {
+            step = step.StepTowards(vec);
+            cockpit.path.Add(step);
+        }
+        cockpit.path.Add(vec);
     }
     
      

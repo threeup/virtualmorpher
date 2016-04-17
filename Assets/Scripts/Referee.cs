@@ -95,6 +95,8 @@ public class Referee : MonoBehaviour {
                 break;
             case RefState.PLAYING:
                 isReady = false;
+                northTeam.AddAI();
+                southTeam.AddAI();
                 orb = Boss.RequestActor(Boss.actorWorld.orbPrototype, orbDropPoint, false);
                 isReady = true;
                 break; 
@@ -151,11 +153,11 @@ public class Referee : MonoBehaviour {
             case RefState.PLAYING:
                 if(isReady && (northTeam.towers.Count == 0 || southTeam.towers.Count == 0) )
                 {
-                    if(northTeam.score == 3 || southTeam.score == 3)
+                    /*if(northTeam.score == 3 || southTeam.score == 3)
                     {
                         GotoState(RefState.FINISHED);
                     }
-                    else
+                    else*/
                     {
                         GotoState(RefState.RESETGAME);   
                     }
@@ -170,10 +172,7 @@ public class Referee : MonoBehaviour {
                 }  
                 break;
             case RefState.FINISHED:
-                if( northTeam.isReady && southTeam.isReady )
-                {
-                    GotoState(RefState.SPAWNING);
-                }
+                
                 break;
         }
         
