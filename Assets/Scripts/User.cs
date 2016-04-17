@@ -82,9 +82,19 @@ public class User : MonoBehaviour
                     ProcessInput = PlayingInput;
                 } 
                 break;
+            case Referee.RefState.RESETGAME:
+                if( isLocal )
+                {
+                    camCtrl.pointsOfInterest.Clear();
+                    camCtrl.keyInterest = null;
+                    uiCtrl.SelectCockpit(null);
+                    ProcessInput = NoInput;
+                } 
+                break;
             case Referee.RefState.FINISHED:
                 if( isLocal )
                 {
+                    camCtrl.pointsOfInterest.Clear();
                     ProcessInput = NoInput;
                 } 
                 break;
@@ -233,7 +243,7 @@ public class User : MonoBehaviour
             {
                 cockpit = team.alpha;
             }
-            uiCtrl.SelectCockpit(team, cockpit);
+            uiCtrl.SelectCockpit(cockpit);
             camCtrl.keyInterest = cockpit != null ? cockpit.transform : null;
         }
     }

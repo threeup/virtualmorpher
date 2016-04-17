@@ -26,10 +26,7 @@ public class Team : MonoBehaviour
     
     void Awake()
     {
-        spawnPosition = this.transform.position - Vector3.right*5f;
-        spawnPosition.z *= 0.5f;
-        towerSpawnPosition = this.transform.position - Vector3.right*5f;
-        towerSpawnPosition.z *= 0.8f;
+        
         spawnRotation = this.transform.rotation;
         ProcessUpdate = NoUpdate;
     }
@@ -56,8 +53,15 @@ public class Team : MonoBehaviour
     {
         switch(state)
         {
+            case Referee.RefState.ROUNDSTART:
+                score = 0;
+                spawnPosition = this.transform.position - Vector3.right*5f;
+                spawnPosition.z *= 0.5f;
+                towerSpawnPosition = this.transform.position - Vector3.right*5f;
+                towerSpawnPosition.z *= 0.8f;
+                isReady = true;
+                break;
             case Referee.RefState.SPAWNING:
-                score = 4;
                 alpha = Boss.RequestPawn("PawnA",this, Pawn.PawnType.FAT);
                 pawns.Add(alpha);
                 bravo = Boss.RequestPawn("PawnB",this, Pawn.PawnType.TALL);
@@ -85,6 +89,22 @@ public class Team : MonoBehaviour
                 break;
             case Referee.RefState.PLAYING:
                 ProcessUpdate = PlayingUpdate;
+                break;
+            case Referee.RefState.RESETGAME:
+                foreach(Pawn pawn in pawns)
+                {
+                    Explode(pawn);
+                }
+                pawns.Clear();
+                alpha = null;
+                bravo = null;
+                charlie = null;
+                foreach(Actor tower in towers)
+                {
+                    Explode(tower);
+                }
+                towers.Clear();
+                isReady = true;
                 break;
             case Referee.RefState.FINISHED:
                 ProcessUpdate = NoUpdate;
@@ -128,18 +148,26 @@ public class Team : MonoBehaviour
         ProcessUpdate(Time.deltaTime);
     }
     
-    public bool Explode(Actor tower)
+    public bool ExplodeTower(Actor tower)
     {
         if( !towers.Contains(tower) )
         {
             return false;
         }
         towers.Remove(tower);
-        Rigidbody[] rbs = tower.gameObject.GetComponentsInChildren<Rigidbody>() ;
-        Debug.Log("rbs"+rbs.Length);
+        Explode(tower);
+        score -= 1;
+        return true;
+    }
+    
+    public void Explode(Actor actor)
+    {
+        Rigidbody[] rbs = actor.gameObject.GetComponentsInChildren<Rigidbody>() ;
         foreach(Rigidbody rb in rbs)
         {
-            rb.gameObject.GetComponent<Collider>().isTrigger = false;
+            Collider c = rb.gameObject.GetComponent<Collider>();
+            c.enabled = true;
+            c.isTrigger = false;
             rb.isKinematic = false;
             rb.transform.parent = null;
             rb.AddForce(new Vector3(
@@ -148,9 +176,8 @@ public class Team : MonoBehaviour
                 UnityEngine.Random.Range(-20,20)), ForceMode.Impulse);
             Boss.actorWorld.garbage.Add(rb.gameObject);
         }
-        Boss.actorWorld.garbage.Add(tower.gameObject);
-        score -= 1;
-        return true;
+        Boss.actorWorld.garbage.Add(actor.gameObject);
+        
     }
     
 }

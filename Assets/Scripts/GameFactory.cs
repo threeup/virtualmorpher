@@ -139,7 +139,7 @@ public class GameFactory : MonoBehaviour
         if( otherMotor.possessTeam != null && 
             otherMotor.possessTeam != other.owner.team )
         {
-            bool exploded = src.owner.team.Explode(src.owner);
+            bool exploded = src.owner.team.ExplodeTower(src.owner);
         }
         
         Vector3 bounceOut = Vector3.up*10f-src.transform.position;

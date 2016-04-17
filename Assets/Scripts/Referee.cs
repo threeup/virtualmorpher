@@ -8,7 +8,7 @@ public class Referee : MonoBehaviour {
     public enum RefState
     {
         NONE,
-        SIDESELECT,
+        ROUNDSTART,
         SPAWNING,
         ACTORSELECT,
         COUNTDOWN,
@@ -45,7 +45,7 @@ public class Referee : MonoBehaviour {
     IEnumerator SetupRoutine()
     {
         yield return null;
-        GotoState(RefState.SPAWNING);
+        GotoState(RefState.ROUNDSTART);
     }
     
     void GotoState(RefState state)
@@ -58,6 +58,12 @@ public class Referee : MonoBehaviour {
         Boss.ShowFloater(this.transform, 0, refState.ToString(), null);
         switch(refState)
         {
+            case RefState.ROUNDSTART:
+                northTeam.isReady = false;
+                southTeam.isReady = false;
+                this.isReady = false;
+                SetAutoReadyTimer(defaultAdvanceTimer);
+                break;
             case RefState.SPAWNING:
                 Boss.menuCtrl.GoSideSelect(false);
                 northTeam.isReady = false;
@@ -91,7 +97,15 @@ public class Referee : MonoBehaviour {
                 isReady = false;
                 orb = Boss.RequestActor(Boss.actorWorld.orbPrototype, orbDropPoint, false);
                 isReady = true;
-                break;    
+                break; 
+            case RefState.RESETGAME:
+                this.isReady = false;
+                northTeam.isReady = false;
+                southTeam.isReady = false;
+                Boss.AddGarbage(orb.gameObject);
+                orb = null;
+                SetAutoReadyTimer(5f);
+                break;   
             case RefState.FINISHED:
                 northTeam.isReady = false;
                 southTeam.isReady = false;
@@ -110,6 +124,12 @@ public class Referee : MonoBehaviour {
     {
         switch(refState)
         {
+            case RefState.ROUNDSTART:
+                if(isReady && northTeam.isReady && southTeam.isReady)
+                {
+                    GotoState(RefState.SPAWNING);
+                }
+                break;
             case RefState.SPAWNING:
                 if(isReady && northTeam.isReady && southTeam.isReady)
                 {
@@ -129,22 +149,30 @@ public class Referee : MonoBehaviour {
                 }
                 break;
             case RefState.PLAYING:
-                if(isReady && !orb)
+                if(isReady && (northTeam.towers.Count == 0 || southTeam.towers.Count == 0) )
                 {
-                    if(northTeam.score == 0 || southTeam.score == 0)
+                    if(northTeam.score == 3 || southTeam.score == 3)
                     {
                         GotoState(RefState.FINISHED);
                     }
                     else
                     {
-                        GotoState(RefState.RESETGAME);    
+                        GotoState(RefState.RESETGAME);   
                     }
                 }
                 break;
-            case RefState.FINISHED:
-                if( northTeam.isReady && southTeam.isReady)
+            case RefState.RESETGAME:
+                //kill everything
+                if( isReady && northTeam.isReady && southTeam.isReady )
                 {
-                    GotoState(RefState.SIDESELECT);
+                    Boss.actorWorld.CleanGarbage();
+                    GotoState(RefState.ROUNDSTART);
+                }  
+                break;
+            case RefState.FINISHED:
+                if( northTeam.isReady && southTeam.isReady )
+                {
+                    GotoState(RefState.SPAWNING);
                 }
                 break;
         }

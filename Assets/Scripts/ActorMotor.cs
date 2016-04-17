@@ -187,7 +187,7 @@ public class ActorMotor : MonoBehaviour, IMotor
             if( possessBone )
             {
                 SetPossessTeam(possessActor.team);
-                Boss.referee.TempFloater("Grabbed by "+possessActor+" "+possessBone);
+                Boss.referee.TempFloater("Grabbed by "+possessActor.name);
             }
             else
             {

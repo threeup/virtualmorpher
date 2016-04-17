@@ -83,5 +83,10 @@ public class Boss
         }
     }
     
+    public static void AddGarbage(GameObject go)
+    {
+        actorWorld.garbage.Add(go);
+    }
+    
     
 }

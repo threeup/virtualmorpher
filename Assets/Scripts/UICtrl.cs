@@ -227,7 +227,7 @@ public class UICtrl : MonoBehaviour
        
     }
     
-    public void SelectCockpit(Team team, Pawn cockpit)
+    public void SelectCockpit(Pawn cockpit)
     {
         editPathMode = cockpit != null;
         

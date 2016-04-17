@@ -10,7 +10,7 @@ public class Cheats : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F1))
         {
             Team northTeam = Boss.referee.northTeam;
-            northTeam.Explode(northTeam.towers[0]);
+            northTeam.ExplodeTower(northTeam.towers[0]);
         }
         if (Input.GetKeyDown(KeyCode.F2))
         {
