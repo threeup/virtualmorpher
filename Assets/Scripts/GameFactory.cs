@@ -127,84 +127,110 @@ public class GameFactory : MonoBehaviour
 	}
     
     
-    public static void BallBounce(Limb victim, Limb other)
+    public static void TowerBounce(Limb src, Limb other, Vector3 diff)
     {
-        
-        Vector3 diff = other.transform.position - victim.transform.position;
-        
-        float bounceAway = 3f;
-        bool catchAttempt = false;
-        switch(other.limbType)
+        if( other.limbType != Limb.LimbType.BALL )
         {
-            case Limb.LimbType.SHIELD:
-                bounceAway = 12f;
-                break;
-            case Limb.LimbType.BULLET:
-                bounceAway = 3f;
-                break;
-            case Limb.LimbType.HEAD:
-            case Limb.LimbType.TORSO:
-            case Limb.LimbType.LEFTARM:
-            case Limb.LimbType.RIGHTARM:
-            case Limb.LimbType.WHEEL:
-                catchAttempt = true;
-                break;
-            default:
-                break;
+            return;
         }
-        ActorMotor victimMotor = victim.owner.motor;
-        float catchSpeed = 5f;
-        if( catchAttempt )
-        {   
-            if( victimMotor.possessActor == other.owner )
-            {
-                return;
-            }
-            float dotp = Vector3.Dot(other.owner.transform.forward, -diff.normalized);
-            if( dotp > 0.2 && victimMotor.GetSpeed() < catchSpeed )
-            {
-                
-                victimMotor.Possess(other.owner.transform, other.owner);
-                return;
-            } 
-            else
-            {
-                Debug.Log("cant "+dotp+" "+victimMotor.GetSpeed());
-            }
+        float bounceAway = 5f;
+        
+        ActorMotor otherMotor = other.owner.motor;
+        if( otherMotor.possessTeam != null && 
+            otherMotor.possessTeam != other.owner.team )
+        {
+            bool exploded = src.owner.team.Explode(src.owner);
         }
-        Debug.Log("BallBounce "+other.limbType);
-        victimMotor.RigidAdd(-diff*bounceAway);
-    }
-    public static void BulletBounce(Limb victim, Limb other)
-    {
-        Debug.Log("BulletBounce "+other.limbType);
-    }
-    public static void ShieldBounce(Limb victim, Limb other)
-    {
-        Debug.Log("ShieldBounce "+other.limbType);
-    }
-    public static void HeadBounce(Limb victim, Limb other)
-    {
-        Debug.Log("HeadBounce "+other.limbType);
-    }
-    public static void TorsoBounce(Limb victim, Limb other)
-    {
-        Debug.Log("TorsoBounce "+other.limbType);
-    }
-    public static void LeftArmBounce(Limb victim, Limb other)
-    {
-        Debug.Log("LeftArmBounce "+other.limbType);
-    }
-    public static void RightArmBounce(Limb victim, Limb other)
-    {
-        Debug.Log("RightArmBounce "+other.limbType);
-    }
-    public static void WheelBounce(Limb victim, Limb other)
-    {
-        Debug.Log("WheelBounce "+other.limbType);
+        
+        Vector3 bounceOut = Vector3.up*10f-src.transform.position;
+        otherMotor.RigidAdd(bounceOut.normalized*bounceAway);
     }
     
-    public static void NoopBounce(Limb limb, Limb other)
+    public static void BallBounce(Limb src, Limb other, Vector3 diff)
+    {
+        ActorMotor srcMotor = src.owner.motor;
+        if( srcMotor.possessActor == other.owner )
+        {
+            return;
+        }
+        
+        float catchSpeed = 5f;
+        float bounceAway = 6f;
+        
+        float dotp = Vector3.Dot(other.owner.transform.forward, -diff.normalized);
+        if( dotp > 0.2 && srcMotor.GetSpeed() < catchSpeed )
+        {
+            //check to see if it is a pop-up
+            srcMotor.Possess(other.owner.transform, other.owner);
+            return;
+        } 
+        else
+        {
+            //Debug.Log("cant "+dotp+" "+srcMotor.GetSpeed());
+        }
+        srcMotor.RigidAdd(-diff.normalized*bounceAway);
+    }
+    public static void BulletBounce(Limb src, Limb other, Vector3 diff)
+    {
+        float bounceAway = 2f;
+        ActorMotor otherMotor = other.owner.motor;
+        otherMotor.RigidAdd(diff.normalized*bounceAway);
+    }
+    public static void ShieldBounce(Limb src, Limb other, Vector3 diff)
+    {
+        float bounceAway = 4f;
+        if( other.limbType == Limb.LimbType.BALL)
+        {
+            ActorMotor srcMotor = src.owner.motor;
+            float slowSpeed = 4f;
+            bool isThrow = srcMotor.GetSpeed() < slowSpeed;
+            if( isThrow )
+            {
+                other.owner.motor.SetPossessTeam(src.owner.team);
+            }
+            if( other.owner.motor.possessActor != null )
+            {
+                other.owner.motor.Possess(null, null);
+            }
+        }
+        
+        //dont use origin of shield
+        diff = other.transform.position - src.owner.transform.position;
+        ActorMotor otherMotor = other.owner.motor;
+        otherMotor.RigidAdd(diff.normalized*bounceAway);
+    }
+    public static void HeadBounce(Limb src, Limb other, Vector3 diff)
+    {
+        float bounceAway = 2f;
+        ActorMotor otherMotor = other.owner.motor;
+        otherMotor.RigidAdd(diff.normalized*bounceAway);
+    }
+    public static void TorsoBounce(Limb src, Limb other, Vector3 diff)
+    {
+        float bounceAway = 2f;
+        ActorMotor otherMotor = other.owner.motor;
+        otherMotor.RigidAdd(diff.normalized*bounceAway);
+    }
+    public static void LeftArmBounce(Limb src, Limb other, Vector3 diff)
+    {
+        float bounceAway = 2f;
+        ActorMotor otherMotor = other.owner.motor;
+        otherMotor.RigidAdd(diff.normalized*bounceAway);
+    }
+    public static void RightArmBounce(Limb src, Limb other, Vector3 diff)
+    {
+        float bounceAway = 2f;
+        ActorMotor otherMotor = other.owner.motor;
+        otherMotor.RigidAdd(diff.normalized*bounceAway);
+    }
+    public static void WheelBounce(Limb src, Limb other, Vector3 diff)
+    {
+        float bounceAway = 2f;
+        ActorMotor otherMotor = other.owner.motor;
+        otherMotor.RigidAdd(diff.normalized*bounceAway);
+    }
+    
+    public static void NoopBounce(Limb src, Limb other, Vector3 diff)
     {
         
     }

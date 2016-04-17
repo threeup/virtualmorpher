@@ -8,10 +8,17 @@ public class Boss
     public static List<CamCtrl> camCtrls = new List<CamCtrl>();
     public static List<UICtrl> uiCtrls = new List<UICtrl>();
     public static ActorWorld actorWorld;
+    public static MotorWorld motorWorld;
+    public static MenuCtrl menuCtrl;
+    public static Referee referee;
     
     public static Pawn RequestPawn(string name, Team team, Pawn.PawnType ptype)
     {
         return actorWorld.RequestPawn(name, team, ptype);
+    }
+    public static Actor RequestTower(string name, Team team, bool giant)
+    {
+        return actorWorld.RequestTower(name, team, giant);
     }
     public static Actor RequestActor(GameObject prototype, Transform origin = null, bool parented = false)
     {
@@ -61,6 +68,20 @@ public class Boss
         }
     }
     
+    public static void Add(IMotor motor)
+    {
+        if( motorWorld != null && !motorWorld.Contains(motor) )
+        {
+            motorWorld.Add(motor);
+        }
+    }
+    public static void Remove(IMotor motor)
+    {
+        if( motorWorld != null )
+        {
+            motorWorld.Remove(motor);
+        }
+    }
     
     
 }

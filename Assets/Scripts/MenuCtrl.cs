@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public class MenuCtrl : MonoBehaviour {
 
-    public static MenuCtrl Ins = null;
     
     public GameObject sideSelectOverlay;
     public GameObject endOfGameOverlay;
@@ -12,7 +11,7 @@ public class MenuCtrl : MonoBehaviour {
     
     void Awake()
     {
-        Ins = this;
+        Boss.menuCtrl = this;
         
     }
     

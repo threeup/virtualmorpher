@@ -15,8 +15,10 @@ public class Team : MonoBehaviour
     public Pawn bravo;
     public Pawn charlie;
     public List<Pawn> pawns = new List<Pawn>();
+    public List<Actor> towers = new List<Actor>();
     
     Vector3 spawnPosition = Vector3.zero;
+    Vector3 towerSpawnPosition = Vector3.zero;
     Quaternion spawnRotation = Quaternion.LookRotation(Vector3.forward, Vector3.up);
     
     public delegate void UpdateDelegate(float deltaTime);
@@ -25,13 +27,22 @@ public class Team : MonoBehaviour
     void Awake()
     {
         spawnPosition = this.transform.position - Vector3.right*5f;
+        spawnPosition.z *= 0.5f;
+        towerSpawnPosition = this.transform.position - Vector3.right*5f;
+        towerSpawnPosition.z *= 0.8f;
         spawnRotation = this.transform.rotation;
         ProcessUpdate = NoUpdate;
     }
-    public Vector3 GetSpawnPosition()
+    public Vector3 GetPawnSpawnPosition()
     {
         Vector3 result = spawnPosition;
         spawnPosition += Vector3.right*5f;
+        return result;
+    }
+    public Vector3 GetTowerSpawnPosition()
+    {
+        Vector3 result = towerSpawnPosition;
+        towerSpawnPosition += Vector3.right*5f;
         return result;
     }
     
@@ -45,19 +56,13 @@ public class Team : MonoBehaviour
     {
         switch(state)
         {
-            case Referee.RefState.SIDESELECT: 
-                score = 0;
-                ProcessUpdate = NoUpdate;
-                break;
             case Referee.RefState.SPAWNING:
+                score = 4;
                 alpha = Boss.RequestPawn("PawnA",this, Pawn.PawnType.FAT);
-                alpha.body.ApplyColor(teamColor);
                 pawns.Add(alpha);
                 bravo = Boss.RequestPawn("PawnB",this, Pawn.PawnType.TALL);
-                bravo.body.ApplyColor(teamColor);
                 pawns.Add(bravo);
                 charlie = Boss.RequestPawn("PawnC",this, Pawn.PawnType.MED);
-                charlie.body.ApplyColor(teamColor);
                 pawns.Add(charlie);
                 isReady = true;
                 ProcessUpdate = NoUpdate;
@@ -66,6 +71,16 @@ public class Team : MonoBehaviour
                 ProcessUpdate = NoUpdate;
                 break;
             case Referee.RefState.COUNTDOWN:
+                for(int i=0; i<3; ++i)
+                {
+                     Actor tower = Boss.RequestTower(teamName+" Tower"+i, this, false);
+                     tower.body.ApplyColor(teamColor);
+                     towers.Add(tower);
+                }
+                Actor giantTower = Boss.RequestTower(teamName+" Home", this, true);
+                giantTower.body.ApplyColor(teamColor);
+                towers.Add(giantTower);
+                
                 ProcessUpdate = NoUpdate;
                 break;
             case Referee.RefState.PLAYING:
@@ -81,8 +96,8 @@ public class Team : MonoBehaviour
     {
         users.Add(user);
         isReady = true;
-        Referee.Ins.SetAutoReadyTimer(5f);
-        Referee.Ins.TempFloater(user+" Joined "+this.teamName);
+        Boss.referee.SetAutoReadyTimer(5f);
+        Boss.referee.TempFloater(user+" Joined "+this.teamName);
     }
     
     public void Remove(User user)
@@ -92,7 +107,7 @@ public class Team : MonoBehaviour
         {
             isReady = false;
         }
-        Referee.Ins.TempFloater(user+" Left "+this.teamName);
+        Boss.referee.TempFloater(user+" Left "+this.teamName);
     }
     
     public void NoUpdate(float deltaTime)
@@ -111,6 +126,31 @@ public class Team : MonoBehaviour
     void Update()
     {
         ProcessUpdate(Time.deltaTime);
+    }
+    
+    public bool Explode(Actor tower)
+    {
+        if( !towers.Contains(tower) )
+        {
+            return false;
+        }
+        towers.Remove(tower);
+        Rigidbody[] rbs = tower.gameObject.GetComponentsInChildren<Rigidbody>() ;
+        Debug.Log("rbs"+rbs.Length);
+        foreach(Rigidbody rb in rbs)
+        {
+            rb.gameObject.GetComponent<Collider>().isTrigger = false;
+            rb.isKinematic = false;
+            rb.transform.parent = null;
+            rb.AddForce(new Vector3(
+                UnityEngine.Random.Range(-20,20),
+                UnityEngine.Random.Range(14,20),
+                UnityEngine.Random.Range(-20,20)), ForceMode.Impulse);
+            Boss.actorWorld.garbage.Add(rb.gameObject);
+        }
+        Boss.actorWorld.garbage.Add(tower.gameObject);
+        score -= 1;
+        return true;
     }
     
 }

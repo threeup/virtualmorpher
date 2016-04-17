@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class ActorMotor : MonoBehaviour, IMotor
 {
+    public Actor actor;
     public float defaultTopSpeed = 1f;
     public float currentTopSpeed = 1f;
     public float rotationSpeed = 2f;
@@ -17,24 +18,30 @@ public class ActorMotor : MonoBehaviour, IMotor
     
     public Transform possessBone = null;
     public Actor possessActor = null;
+    public Team possessTeam = null;
     
     float possessionLockTimer = -1f;
+    float possessTeamTimer = -1f;
+    
+    Vector3 impactForce = Vector3.zero;
+    float impactDuration = -1f;
     
     void Awake()
     {
         currentTopSpeed = defaultTopSpeed;
+        actor = GetComponent<Actor>();
         cc = GetComponent<CharacterController>();
         rigbody = GetComponent<Rigidbody>();
     }
     void OnEnable()
     {
-        MotorWorld.Ins.Add(this);
+        Boss.Add(this);
         destination = this.transform.position;
     }
     
     void OnDisable()
     {
-        MotorWorld.Ins.Remove(this);
+        Boss.Remove(this);
     }
     
     public void SetRelativeDestination(Vector2 amount)
@@ -64,18 +71,33 @@ public class ActorMotor : MonoBehaviour, IMotor
         {
             possessionLockTimer -= deltaTime;
         } 
+        if( impactDuration > 0 )
+        {
+            impactDuration -= deltaTime;
+        }
+        if( possessTeamTimer > 0 )
+        {
+            possessTeamTimer -= deltaTime;
+            if( possessTeamTimer <= 0f )
+            {
+                SetPossessTeam(null);
+            }
+        }
+        if( cc )
+        { 
+            destination.y = 0;
+        }
         Vector3 diff = destination - this.transform.position;
         if( rigbody != null )
         {
             if( possessBone != null )
             {
-                float offset = 1f;
+                float offset = 1.7f;
                 destination = possessBone.position + offset*possessBone.forward;
                 destination.y = 1f;
                 diff = destination - this.transform.position;
                 if( diff.magnitude > 4f )
                 {
-                    Debug.Log("Drop"+diff.magnitude);
                     Possess(null, null);
                 }
                 else
@@ -87,7 +109,6 @@ public class ActorMotor : MonoBehaviour, IMotor
             return;
         }
         
-        diff.y = 0; 
         float magn = diff.magnitude;
         float nextStep = magn;
         nextStep = Mathf.Min(nextStep, currentTopSpeed*deltaTime);
@@ -97,6 +118,10 @@ public class ActorMotor : MonoBehaviour, IMotor
         Vector3 delta = GetDirection()*GetSpeed()*deltaTime;
         if( cc )
         {
+            if( impactDuration > 0f )
+            {
+                delta = impactForce*deltaTime;
+            }
             cc.Move(delta);
         }
         else if( rigbody )
@@ -129,12 +154,28 @@ public class ActorMotor : MonoBehaviour, IMotor
     
     public void RigidGo(Vector3 endpoint)
     {
-        rigbody.AddForce(endpoint - this.transform.position, ForceMode.Impulse);
+        if( cc )
+        {
+            impactForce = endpoint - this.transform.position;
+            impactDuration = 0.2f;
+        }
+        else
+        {
+            rigbody.AddForce(endpoint - this.transform.position, ForceMode.Impulse);
+        }
     }
     
     public void RigidAdd(Vector3 added)
     {
-        rigbody.AddForce(added, ForceMode.Impulse);
+        if( cc )
+        {
+            impactForce = added;
+            impactDuration = 0.2f;
+        }
+        else
+        {
+            rigbody.AddForce(added, ForceMode.Impulse);
+        }
     }
     
     public void Possess(Transform possessBone, Actor possessActor)
@@ -142,13 +183,16 @@ public class ActorMotor : MonoBehaviour, IMotor
         if( this.possessBone != possessBone && possessionLockTimer < 0f )
         { 
             this.possessBone = possessBone;
+            this.possessActor = possessActor;
             if( possessBone )
             {
-                Referee.Ins.TempFloater("Grabbed by "+possessActor+" "+possessBone);
+                SetPossessTeam(possessActor.team);
+                Boss.referee.TempFloater("Grabbed by "+possessActor+" "+possessBone);
             }
             else
             {
-                Referee.Ins.TempFloater("Dropped!");
+                Boss.referee.TempFloater("Dropped!");
+                possessTeamTimer = 2f;
             }
         }
     }
@@ -158,6 +202,24 @@ public class ActorMotor : MonoBehaviour, IMotor
         if( val )
         {
             possessionLockTimer = 2f;
+        }
+    }
+    
+    public void SetPossessTeam(Team team)
+    {
+        if( possessTeam == team )
+        {
+            return;
+        }
+        possessTeam = team;
+        if( team )
+        {
+            actor.body.ApplyColor(Color.Lerp(Color.white, team.teamColor, 0.5f));
+        }
+        else
+        {
+            actor.body.ApplyColor(Color.white);
+            possessTeamTimer = 2f;
         }
     }
 }

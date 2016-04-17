@@ -15,6 +15,12 @@ public class ActorWorld : MonoBehaviour {
     public GameObject toolPrototype;
     public GameObject roboBodyPrototype;
     
+    public GameObject towerPrototype;
+    public GameObject towerBodyPrototype;
+    public GameObject giantTowerBodyPrototype;  
+    
+    public List<GameObject> garbage = new List<GameObject>(); 
+    public float garbageTimer = 7f; 
 
 	void Awake() 
     {
@@ -23,7 +29,7 @@ public class ActorWorld : MonoBehaviour {
     
     public Pawn RequestPawn(string name, Team team, Pawn.PawnType ptype)
     {
-        GameObject pawnObject = GameObject.Instantiate(pawnPrototype, team.GetSpawnPosition(), team.GetSpawnRotation()) as GameObject;
+        GameObject pawnObject = GameObject.Instantiate(pawnPrototype, team.GetPawnSpawnPosition(), team.GetSpawnRotation()) as GameObject;
         pawnObject.name = name;
         Pawn pawn = pawnObject.GetComponent<Pawn>();
         pawn.team = team;
@@ -41,8 +47,26 @@ public class ActorWorld : MonoBehaviour {
         {
             pawn.body.transform.SetParent(pawn.transform, false);
         }
+        pawn.body.ApplyColor(team.teamColor);
         pawn.GoAlive();
         return pawn;
+    }
+    
+    public Actor RequestTower(string name, Team team, bool giant)
+    {
+        Vector3 spawnPos = giant ? team.transform.position : team.GetTowerSpawnPosition();
+        GameObject towerObject = GameObject.Instantiate(towerPrototype, spawnPos, team.GetSpawnRotation()) as GameObject;
+        towerObject.name = name;
+        Actor actor = towerObject.GetComponent<Actor>();
+        actor.team = team;
+        GameObject bodyObject = GameObject.Instantiate(giant ? giantTowerBodyPrototype : towerBodyPrototype) as GameObject;
+        actor.body = bodyObject != null ? bodyObject.GetComponent<ActorBody>() : null;
+        if( actor.body != null )
+        {
+            actor.body.transform.SetParent(actor.transform, false);
+        }
+        actor.GoAlive();
+        return actor;
     }
     
     public Actor RequestBullet(Transform origin)
@@ -93,5 +117,23 @@ public class ActorWorld : MonoBehaviour {
         activeActors.Remove(actor);
     }
     
+    public void Update()
+    {
+        garbageTimer -= Time.deltaTime;
+        if( garbageTimer < 0 )
+        {
+            garbageTimer = 5f;
+            CleanGarbage();
+        }
+    }
+    
+    public void CleanGarbage()
+    {
+        for(int i=garbage.Count -1; i>=0 ; --i)
+        {
+            Destroy(garbage[i]);
+        }
+        garbage.Clear();
+    }
 
 }

@@ -59,7 +59,7 @@ public class User : MonoBehaviour
                 {
                     uiCtrl.HideFloater(floorCursor.transform, 0);
                     camCtrl.pointsOfInterest.Add(stickCursor.transform);
-                    camCtrl.pointsOfInterest.Add(Referee.Ins.transform);
+                    camCtrl.pointsOfInterest.Add(Boss.referee.transform);
                     ProcessInput = ActorSelectInput;
                 }
                 break;
@@ -72,13 +72,13 @@ public class User : MonoBehaviour
                     camCtrl.pointsOfInterest.Add(team.alpha.transform);
                     camCtrl.pointsOfInterest.Add(team.bravo.transform);
                     camCtrl.pointsOfInterest.Add(team.charlie.transform);
-                    camCtrl.pointsOfInterest.Add(Referee.Ins.transform);
+                    camCtrl.pointsOfInterest.Add(Boss.referee.transform);
                 }
                 break;
             case Referee.RefState.PLAYING:
                 if( isLocal )
                 {
-                    camCtrl.pointsOfInterest.Remove(Referee.Ins.transform);
+                    camCtrl.pointsOfInterest.Remove(Boss.referee.transform);
                     ProcessInput = PlayingInput;
                 } 
                 break;
@@ -121,11 +121,11 @@ public class User : MonoBehaviour
             desiredTeam = null;
             if( floorCursor.transform.position.z < -1f )
             {
-                desiredTeam = Referee.Ins.northTeam;
+                desiredTeam = Boss.referee.northTeam;
             }
             else if( floorCursor.transform.position.z > 1f )
             {
-                desiredTeam = Referee.Ins.southTeam;
+                desiredTeam = Boss.referee.southTeam;
             } 
 
             if( !desiredTeam )

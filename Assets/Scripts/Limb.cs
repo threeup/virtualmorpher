@@ -4,21 +4,22 @@ public class Limb : MonoBehaviour
 {
     public enum LimbType
     {
-        BALL = 0,
+        TOWER = 0,
         BULLET = 1,
         SHIELD = 2,
-        HEAD = 3,
-        TORSO = 4,
+        BALL = 3,
+        HEAD = 4,
         LEFTARM = 5,
         RIGHTARM = 6,
         WHEEL = 7,
+        TORSO = 8, 
     }
     
     public LimbType limbType;
     public Actor owner;
     public Collider coll;
     
-    public delegate void BounceDelegate(Limb limb, Limb other);
+    public delegate void BounceDelegate(Limb limb, Limb other, Vector3 diff);
     public BounceDelegate ProcessBounce;
     
     void Awake()
@@ -30,11 +31,7 @@ public class Limb : MonoBehaviour
     void Start()
     {
         owner = this.transform.root.gameObject.GetComponent<Actor>();
-        if( owner == null )
-        {
-            Debug.Log(this.transform.root.gameObject, this);
-        }
-        else
+        if( owner != null )
         {
             owner.RegisterLimb(this, limbType);    
         }
@@ -48,13 +45,14 @@ public class Limb : MonoBehaviour
         {
             return;
         }
+        Vector3 diff = otherLimb.transform.position - this.transform.position;
         if( (int)limbType <= (int)otherLimb.limbType )
         {
-            ProcessBounce(this, otherLimb);
+            ProcessBounce(this, otherLimb, diff);
         }
         else
         {
-            otherLimb.ProcessBounce(otherLimb, this);
+            otherLimb.ProcessBounce(otherLimb, this, diff);
         }
     }
     
@@ -65,13 +63,14 @@ public class Limb : MonoBehaviour
         {
             return;
         }
+        Vector3 diff = otherLimb.transform.position - this.transform.position;
         if( (int)limbType <= (int)otherLimb.limbType )
         {
-            ProcessBounce(this, otherLimb);
+            ProcessBounce(this, otherLimb, diff);
         }
         else
         {
-            otherLimb.ProcessBounce(otherLimb, this);
+            otherLimb.ProcessBounce(otherLimb, this, diff);
         }
     }
     

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public class Referee : MonoBehaviour {
 
-    public static Referee Ins;
     
     public enum RefState
     {
@@ -34,7 +33,7 @@ public class Referee : MonoBehaviour {
     
     void Awake()
     {
-        Ins = this;
+        Boss.referee = this;
     }
     
     void Start()
@@ -60,7 +59,7 @@ public class Referee : MonoBehaviour {
         switch(refState)
         {
             case RefState.SPAWNING:
-                MenuCtrl.Ins.GoSideSelect(false);
+                Boss.menuCtrl.GoSideSelect(false);
                 northTeam.isReady = false;
                 southTeam.isReady = false;
                 break;
@@ -80,12 +79,12 @@ public class Referee : MonoBehaviour {
                         user.AssignCamera(null);
                     }
                 }
-                MenuCtrl.Ins.GoSideSelect(true);
-                MenuCtrl.Ins.GoEndOfGame(false);
+                Boss.menuCtrl.GoSideSelect(true);
+                Boss.menuCtrl.GoEndOfGame(false);
                 break;
             case RefState.COUNTDOWN:
                 this.isReady = false;
-                MenuCtrl.Ins.GoSideSelect(false);
+                Boss.menuCtrl.GoSideSelect(false);
                 SetAutoReadyTimer(defaultAdvanceTimer);
                 break;
             case RefState.PLAYING:
@@ -96,7 +95,7 @@ public class Referee : MonoBehaviour {
             case RefState.FINISHED:
                 northTeam.isReady = false;
                 southTeam.isReady = false;
-                MenuCtrl.Ins.GoEndOfGame(true);
+                Boss.menuCtrl.GoEndOfGame(true);
                 break;
         }
         northTeam.HandleRefStateChange(refState);
@@ -132,7 +131,7 @@ public class Referee : MonoBehaviour {
             case RefState.PLAYING:
                 if(isReady && !orb)
                 {
-                    if(northTeam.score > 2 || southTeam.score > 2)
+                    if(northTeam.score == 0 || southTeam.score == 0)
                     {
                         GotoState(RefState.FINISHED);
                     }

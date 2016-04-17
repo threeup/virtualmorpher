@@ -4,6 +4,7 @@ public class Actor : MonoBehaviour
 {
     public ActorBody body;
     public ActorMotor motor;
+    public Team team;
     
     public float GetSpeed() { return motor.GetSpeed(); }
     
@@ -52,9 +53,10 @@ public class Actor : MonoBehaviour
     {
         switch(limbType)
         {
-            case Limb.LimbType.BALL: limb.ProcessBounce = GameFactory.BallBounce; break;
+            case Limb.LimbType.TOWER: limb.ProcessBounce = GameFactory.TowerBounce; break;
             case Limb.LimbType.BULLET: limb.ProcessBounce = GameFactory.BulletBounce; break;
             case Limb.LimbType.SHIELD: limb.ProcessBounce = GameFactory.ShieldBounce; break;
+            case Limb.LimbType.BALL: limb.ProcessBounce = GameFactory.BallBounce; break;
             case Limb.LimbType.HEAD: limb.ProcessBounce = GameFactory.HeadBounce; break;
             case Limb.LimbType.TORSO: limb.ProcessBounce = GameFactory.TorsoBounce; break;
             case Limb.LimbType.LEFTARM: limb.ProcessBounce = GameFactory.LeftArmBounce; break;

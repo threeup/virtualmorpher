@@ -4,13 +4,11 @@ using System.Collections.Generic;
 
 public class MotorWorld : MonoBehaviour {
 
-    public static MotorWorld Ins = null;
-    
     public List<IMotor> activeMotors = new List<IMotor>();
 
 	void Awake() 
     {
-	    Ins = this;
+	    Boss.motorWorld = this;
 	}
     
     public void Add(IMotor motor)

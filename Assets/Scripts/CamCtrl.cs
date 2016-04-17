@@ -34,20 +34,17 @@ public class CamCtrl : MonoBehaviour, IMotor {
     
     void Start()
     {
-        MotorWorld.Ins.Add(this);
+        Boss.Add(this);
     }
     
     void OnEnable()
     {
-        if( MotorWorld.Ins != null && !MotorWorld.Ins.Contains(this))
-        {
-            MotorWorld.Ins.Add(this);
-        }
+        Boss.Add(this);
     }
     
     void OnDisable()
     {
-        MotorWorld.Ins.Remove(this);
+        Boss.Remove(this);
     }
     
     void ScanInterest()
