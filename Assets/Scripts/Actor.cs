@@ -16,24 +16,33 @@ public class Actor : MonoBehaviour
     }
     
     public virtual void GoDead()
-    {
+{
         ActorWorld.Ins.Remove(this);
     }
     
     public void SetAxis(Vector2 axis)
     {
-        motor.SetVelocity(axis);
+        motor.SetRelativeDestination(axis);
     }
     public void SetAxis(Vector3 axis)
     {
         Vector2 adjusted = new Vector2(axis.x, axis.z);
-        motor.SetVelocity(adjusted);
+        motor.SetRelativeDestination(adjusted);
     }
     
-    public void SetVelocityForward(float amount)
+    public void SetDestination(Vector2 axis)
     {
-        
-        motor.SetVelocity(this.transform.forward * amount);
+        motor.SetDestination(axis);
+    }
+    public void SetDestination(Vector3 axis)
+    {
+        Vector2 adjusted = new Vector2(axis.x, axis.z);
+        motor.SetDestination(adjusted);
+    }
+    
+    public void SetForwardDestination(float amount)
+    {
+        motor.SetRelativeDestination(this.transform.forward * amount);
     }
 
 }

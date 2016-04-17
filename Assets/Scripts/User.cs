@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public class User : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class User : MonoBehaviour
     Actor cursor;
     Actor selection;
     public Team team;
+    Team desiredTeam;
 
     public Pawn cockpit;
     
@@ -36,13 +38,26 @@ public class User : MonoBehaviour
                 if( isLocal )
                 {
                     camCtrl.pointsOfInterest.Add(cursor.transform);
-                    camCtrl.pointsOfInterest.Add(selection.transform);
-                    ProcessInput = PregameInput;
+                    ProcessInput = SideSelectInput;
                 } 
+                break;
+            case Referee.RefState.SPAWNING:
+                if( isLocal )
+                {
+                    ProcessInput = NoInput;
+                }
+                break;
+            case Referee.RefState.ACTORSELECT:
+                if( isLocal )
+                {
+                    ProcessInput = ActorSelectInput;
+                }
                 break;
             case Referee.RefState.COUNTDOWN:
                 if( isLocal )
                 {
+                    ProcessInput = NoInput;
+                    camCtrl.HideFloater(selection.transform, 0);
                     camCtrl.pointsOfInterest.Clear();
                     camCtrl.pointsOfInterest.Add(team.alpha.transform);
                     camCtrl.pointsOfInterest.Add(team.bravo.transform);
@@ -55,6 +70,12 @@ public class User : MonoBehaviour
                     ProcessInput = PlayingInput;
                 } 
                 break;
+            case Referee.RefState.FINISHED:
+                if( isLocal )
+                {
+                    ProcessInput = NoInput;
+                } 
+                break;
         }
     }
     
@@ -63,12 +84,19 @@ public class User : MonoBehaviour
         return false;
     }
     
-    
-    public bool PregameInput(float deltaTime, InputCtrl.InputParams inputs)
+    public bool ActorSelectInput(float deltaTime, InputCtrl.InputParams inputs)
     {
-        if( inputs.primaryButton )
+        if( inputs.button[0] )
         {
-            Team desiredTeam = null;
+            
+        }
+        return true;
+    }
+    public bool SideSelectInput(float deltaTime, InputCtrl.InputParams inputs)
+    {
+        if( inputs.button[0] )
+        {
+            desiredTeam = null;
             if( selection.transform.position.z < -1f )
             {
                 desiredTeam = Referee.Ins.southTeam;
@@ -77,25 +105,49 @@ public class User : MonoBehaviour
             {
                 desiredTeam = Referee.Ins.northTeam;
             } 
-            if( team == desiredTeam )
+
+            if( !desiredTeam )
             {
-                Referee.Ins.SpeedUp();
-            }  
-            else
-            {
-                if( team != null )
+                if( team )
                 {
-                    team.Remove(this);
+                    Action<bool> floaterSucess = success => JoinTeam(null);
+                    camCtrl.ShowFloater(selection.transform, 0, "Leave "+team+"?", floaterSucess);
                 }
-                if( desiredTeam != null )
+                else
                 {
-                    desiredTeam.Add(this);
+                    camCtrl.HideFloater(selection.transform, 0);
                 }
             }
-            selection.SetAxis(cursor.transform.position - selection.transform.position);
+            else if( desiredTeam != team )
+            {
+                Action<bool> floaterSucess = success => JoinTeam(desiredTeam);
+                camCtrl.ShowFloater(selection.transform, 0, "Join "+desiredTeam.teamName+"?", floaterSucess);
+            }
+            camCtrl.ClickHeld(cursor.transform.position);
+        }
+        if( inputs.buttonDown[0] )
+        {
+            camCtrl.ClickDown(cursor.transform.position);
+        }
+        if( inputs.buttonUp[0] )
+        {
+            camCtrl.ClickUp(cursor.transform.position);
         }
         cursor.SetAxis(inputs.leftAxis);
         return true;
+    }
+    
+    void JoinTeam(Team nextTeam)
+    {
+        if( team != null )
+        {
+            team.Remove(this);
+        }
+        team = nextTeam;
+        if( team != null )
+        {
+            team.Add(this);
+        }
     }
     
     public bool ReadyInput(float deltaTime, InputCtrl.InputParams inputs)
@@ -108,7 +160,7 @@ public class User : MonoBehaviour
         if( cockpit != null )
         {
             cockpit.SetAxis(inputs.leftAxis);
-            cockpit.DoInput(deltaTime, inputs.primaryButton, inputs.secondaryButton);
+            cockpit.DoInput(deltaTime, inputs.button[0], inputs.button[1]);
             cursor.SetAxis(Vector2.zero);
         }
         else
@@ -116,7 +168,7 @@ public class User : MonoBehaviour
             cursor.SetAxis(inputs.leftAxis);
         }
         selection.SetAxis(cursor.transform.position - selection.transform.position);
-        if( inputs.tertiaryButton )
+        if( inputs.buttonDown[2] )
         {
             if( cockpit == null )
             {

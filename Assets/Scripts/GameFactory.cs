@@ -50,7 +50,7 @@ public class GameFactory : MonoBehaviour
     public static void BulletActivate(GameAbility ga)
 	{
 		Actor bullet = ActorWorld.Ins.RequestBullet(ga.bone);
-        bullet.SetVelocityForward(20f);
+        bullet.SetForwardDestination(20f);
 	}
     
     public static void ShieldStart(GameAbility ga)

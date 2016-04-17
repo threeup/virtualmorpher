@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class Team : MonoBehaviour
 {
+    public string teamName = "Team";
     public bool isReady = false;
     public int score;
     
@@ -47,6 +48,8 @@ public class Team : MonoBehaviour
                 charlie = ActorWorld.Ins.RequestPawn("PawnC",this, Pawn.PawnType.MED);
                 isReady = true;
                 break;
+            case Referee.RefState.ACTORSELECT:
+                break;
             case Referee.RefState.COUNTDOWN:
                 break;
             case Referee.RefState.PLAYING:
@@ -60,6 +63,8 @@ public class Team : MonoBehaviour
     {
         users.Add(user);
         isReady = true;
+        Referee.Ins.SetAutoReadyTimer(5f);
+        Referee.Ins.TempFloater(user+" Joined "+this.teamName);
     }
     
     public void Remove(User user)
@@ -69,6 +74,7 @@ public class Team : MonoBehaviour
         {
             isReady = false;
         }
+        Referee.Ins.TempFloater(user+" Left "+this.teamName);
     }
     
     

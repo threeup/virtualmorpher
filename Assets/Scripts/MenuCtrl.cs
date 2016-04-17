@@ -9,9 +9,11 @@ public class MenuCtrl : MonoBehaviour {
     public GameObject sideSelectOverlay;
     public GameObject endOfGameOverlay;
     
+    
     void Awake()
     {
         Ins = this;
+        
     }
     
     public void GoSideSelect(bool enabled)
@@ -23,5 +25,7 @@ public class MenuCtrl : MonoBehaviour {
     {
         endOfGameOverlay.gameObject.SetActive(enabled);
     }
+    
+    
 
 }

@@ -17,6 +17,7 @@ public class ActorWorld : MonoBehaviour {
     public GameObject toolPrototype;
     public GameObject roboBodyPrototype;
     public GameObject cursorPrototype;
+    public GameObject selectionPrototype;
     
 
 	void Awake() 

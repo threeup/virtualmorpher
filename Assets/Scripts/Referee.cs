@@ -11,6 +11,7 @@ public class Referee : MonoBehaviour {
         NONE,
         SIDESELECT,
         SPAWNING,
+        ACTORSELECT,
         COUNTDOWN,
         PLAYING,
         RESETGAME,
@@ -24,6 +25,10 @@ public class Referee : MonoBehaviour {
     public List<User> users = new List<User>();
     public Transform orbDropPoint;
     public Actor orb;
+    
+    float autoReadyTimer = -1f;
+    float tempFloaterTimer = -1f;
+    bool isReady = true;
     
     void Awake()
     {
@@ -49,6 +54,7 @@ public class Referee : MonoBehaviour {
             return;
         }
         refState = state;
+        CamCtrl.First.ShowFloater(this.transform, 0, refState.ToString(), null);
         switch(refState)
         {
             case RefState.SIDESELECT:
@@ -75,11 +81,19 @@ public class Referee : MonoBehaviour {
                 northTeam.isReady = false;
                 southTeam.isReady = false;
                 break;
+            case RefState.ACTORSELECT:
+                northTeam.isReady = false;
+                southTeam.isReady = false;
+                SetAutoReadyTimer(5f);
+                break;
             case RefState.COUNTDOWN:
-                
+                this.isReady = false;
+                SetAutoReadyTimer(5f);
                 break;
             case RefState.PLAYING:
+                isReady = false;
                 orb = ActorWorld.Ins.RequestOrb(orbDropPoint);
+                isReady = true;
                 break;    
             case RefState.FINISHED:
                 northTeam.isReady = false;
@@ -100,22 +114,31 @@ public class Referee : MonoBehaviour {
         switch(refState)
         {
             case RefState.SIDESELECT:
-                if(northTeam.isReady && southTeam.isReady)
+                if(isReady && northTeam.isReady && southTeam.isReady)
                 {
                     GotoState(RefState.SPAWNING);
                 }
                 break;
             case RefState.SPAWNING:
-                if(northTeam.isReady && southTeam.isReady && orb)
+                if(isReady && northTeam.isReady && southTeam.isReady)
+                {
+                    GotoState(RefState.ACTORSELECT);
+                }
+                break;
+            case RefState.ACTORSELECT:
+                if(isReady && northTeam.isReady && southTeam.isReady)
                 {
                     GotoState(RefState.COUNTDOWN);
                 }
                 break;
             case RefState.COUNTDOWN:
-                GotoState(RefState.PLAYING);
+                if(isReady)
+                {
+                    GotoState(RefState.PLAYING);
+                }
                 break;
             case RefState.PLAYING:
-                if(!orb)
+                if(isReady && !orb)
                 {
                     if(northTeam.score > 2 || southTeam.score > 2)
                     {
@@ -134,10 +157,46 @@ public class Referee : MonoBehaviour {
                 }
                 break;
         }
+        
+        if( autoReadyTimer > 0 )
+        {
+            autoReadyTimer -= Time.deltaTime;
+            if( autoReadyTimer <= 0f )
+            {
+                northTeam.isReady = true;
+                southTeam.isReady = true;
+                isReady = true;
+                autoReadyTimer = -1f;
+                CamCtrl.First.HideFloater(this.transform, 1);
+            }
+            else
+            {
+                int rounded = (int)Mathf.Round(autoReadyTimer*10);
+                CamCtrl.First.ShowFloater(this.transform, 1, "Starting in "+rounded/10f, null);
+            }
+            
+        }
+        if( tempFloaterTimer > 0 )
+        {
+            tempFloaterTimer -= Time.deltaTime;
+            if( tempFloaterTimer <= 0f )
+            {
+                CamCtrl.First.HideFloater(this.transform, 2);
+            }
+        }
     }
     
-    public void SpeedUp()
+    public void SetAutoReadyTimer(float amount)
     {
-        
+        if( autoReadyTimer < 0 || autoReadyTimer > amount )
+        {
+            autoReadyTimer = amount;
+        }
+    }
+    
+    public void TempFloater(string txt)
+    {
+        CamCtrl.First.ShowFloater(this.transform, 2, txt, null);
+        tempFloaterTimer = 3f;
     }
 }
