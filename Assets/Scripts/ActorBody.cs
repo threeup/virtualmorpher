@@ -6,6 +6,7 @@ public class ActorBody : MonoBehaviour
 {
     
     public Transform actionPoint;
+    public Transform coreCollision;
     
     [SerializeField]
     Transform leftArm;

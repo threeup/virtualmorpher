@@ -5,6 +5,8 @@ public class Actor : MonoBehaviour
     public ActorBody body;
     public ActorMotor motor;
     
+    public float GetSpeed() { return motor.GetSpeed(); }
+    
     public virtual void Awake()
     {
         motor = GetComponent<ActorMotor>();
@@ -45,5 +47,22 @@ public class Actor : MonoBehaviour
     {
         motor.SetRelativeDestination(this.transform.forward * 999f);
     }
+    
+    public void RegisterLimb(Limb limb, Limb.LimbType limbType)
+    {
+        switch(limbType)
+        {
+            case Limb.LimbType.BALL: limb.ProcessBounce = GameFactory.BallBounce; break;
+            case Limb.LimbType.BULLET: limb.ProcessBounce = GameFactory.BulletBounce; break;
+            case Limb.LimbType.SHIELD: limb.ProcessBounce = GameFactory.ShieldBounce; break;
+            case Limb.LimbType.HEAD: limb.ProcessBounce = GameFactory.HeadBounce; break;
+            case Limb.LimbType.TORSO: limb.ProcessBounce = GameFactory.TorsoBounce; break;
+            case Limb.LimbType.LEFTARM: limb.ProcessBounce = GameFactory.LeftArmBounce; break;
+            case Limb.LimbType.RIGHTARM: limb.ProcessBounce = GameFactory.RightArmBounce; break;
+            case Limb.LimbType.WHEEL: limb.ProcessBounce = GameFactory.WheelBounce; break;
+            default: break;
+        }
+    }
+    
 
 }
