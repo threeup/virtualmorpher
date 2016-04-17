@@ -34,6 +34,8 @@ public class CamCtrl : MonoBehaviour, IMotor {
     public GameObject floaterPrototype;
     List<Floater> floaters = new List<Floater>();
     
+    float selectionExpireTimer = -1f;
+    
 	// Use this for initialization
 	void Awake () {
 	    cam = this.GetComponent<Camera>();
@@ -55,6 +57,7 @@ public class CamCtrl : MonoBehaviour, IMotor {
             floater.camCtrl = this;
             floaters.Add(floater);
         }
+        hudcanvas.gameObject.SetActive(true);
 	}
     
     void Start()
@@ -154,6 +157,15 @@ public class CamCtrl : MonoBehaviour, IMotor {
 	// Update is called once per frame
 	void Update () {
         ScanInterest();
+        if( selectionExpireTimer > 0 )
+        {
+            selectionExpireTimer -= Time.deltaTime;
+            if( selectionExpireTimer <= 0f )
+            {
+                selection.body.gameObject.SetActive(false);
+                HideFloater(selection.transform);
+            }
+        }
 	}
     
     public void ShowFloater(Transform target, int line, string text, Action<bool> onClick)
@@ -195,6 +207,16 @@ public class CamCtrl : MonoBehaviour, IMotor {
             }
         }
     }
+    public void HideFloater(Transform target)
+    {
+        foreach(Floater floater in floaters)
+        {
+            if(floater.target == target)
+            {
+                floater.Hide();
+            }
+        }
+    }
     public void ClickFloater(Transform target)
     {
         foreach(Floater floater in floaters)
@@ -209,6 +231,7 @@ public class CamCtrl : MonoBehaviour, IMotor {
     public void ClickHeld(Vector3 position)
     {
         selection.SetDestination(position);
+        selectionExpireTimer = 1f;
     }
     
     public void ClickDown(Vector3 position)
@@ -220,6 +243,7 @@ public class CamCtrl : MonoBehaviour, IMotor {
             ClickFloater(selection.transform);
         }
         selection.SetDestination(position);
+        selection.body.gameObject.SetActive(true);
     }
     
     public void ClickUp(Vector3 position)

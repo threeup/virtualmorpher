@@ -6,7 +6,7 @@ public class User : MonoBehaviour
     bool isLocal;
     public bool IsLocal { get { return isLocal; } } 
     
-    CamCtrl camCtrl;
+    public CamCtrl camCtrl;
     Actor cursor;
     Actor selection;
     public Team team;
@@ -38,6 +38,7 @@ public class User : MonoBehaviour
                 if( isLocal )
                 {
                     camCtrl.pointsOfInterest.Add(cursor.transform);
+                    camCtrl.pointsOfInterest.Add(Referee.Ins.transform);
                     ProcessInput = SideSelectInput;
                 } 
                 break;
@@ -45,6 +46,7 @@ public class User : MonoBehaviour
                 if( isLocal )
                 {
                     ProcessInput = NoInput;
+                    camCtrl.HideFloater(selection.transform, 0);
                 }
                 break;
             case Referee.RefState.ACTORSELECT:
@@ -62,11 +64,13 @@ public class User : MonoBehaviour
                     camCtrl.pointsOfInterest.Add(team.alpha.transform);
                     camCtrl.pointsOfInterest.Add(team.bravo.transform);
                     camCtrl.pointsOfInterest.Add(team.charlie.transform);
+                    camCtrl.pointsOfInterest.Add(Referee.Ins.transform);
                 }
                 break;
             case Referee.RefState.PLAYING:
                 if( isLocal )
                 {
+                    camCtrl.pointsOfInterest.Remove(Referee.Ins.transform);
                     ProcessInput = PlayingInput;
                 } 
                 break;
@@ -147,6 +151,19 @@ public class User : MonoBehaviour
         if( team != null )
         {
             team.Add(this);
+            if( isLocal )
+            {
+                camCtrl.cursor.body.ApplyColor(team.teamColor);
+                camCtrl.selection.body.ApplyColor(team.teamColor);
+            }
+        }
+        else
+        {
+            if( isLocal )
+            {
+                camCtrl.cursor.body.ApplyColor(Color.white);
+                camCtrl.selection.body.ApplyColor(Color.white);
+            }
         }
     }
     

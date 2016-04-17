@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class Team : MonoBehaviour
 {
     public string teamName = "Team";
+    public Color teamColor = Color.white;
     public bool isReady = false;
     public int score;
     
@@ -44,8 +45,11 @@ public class Team : MonoBehaviour
                 break;
             case Referee.RefState.SPAWNING:
                 alpha = ActorWorld.Ins.RequestPawn("PawnA",this, Pawn.PawnType.FAT);
+                alpha.body.ApplyColor(teamColor);
                 bravo = ActorWorld.Ins.RequestPawn("PawnB",this, Pawn.PawnType.TALL);
+                bravo.body.ApplyColor(teamColor);
                 charlie = ActorWorld.Ins.RequestPawn("PawnC",this, Pawn.PawnType.MED);
+                charlie.body.ApplyColor(teamColor);
                 isReady = true;
                 break;
             case Referee.RefState.ACTORSELECT:
@@ -65,6 +69,8 @@ public class Team : MonoBehaviour
         isReady = true;
         Referee.Ins.SetAutoReadyTimer(5f);
         Referee.Ins.TempFloater(user+" Joined "+this.teamName);
+        user.camCtrl.cursor.body.ApplyColor(teamColor);
+        user.camCtrl.selection.body.ApplyColor(teamColor);
     }
     
     public void Remove(User user)
@@ -75,6 +81,9 @@ public class Team : MonoBehaviour
             isReady = false;
         }
         Referee.Ins.TempFloater(user+" Left "+this.teamName);
+        
+        user.camCtrl.cursor.body.ApplyColor(Color.white);
+        user.camCtrl.selection.body.ApplyColor(Color.white);
     }
     
     

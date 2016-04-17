@@ -30,6 +30,8 @@ public class Referee : MonoBehaviour {
     float tempFloaterTimer = -1f;
     bool isReady = true;
     
+    float defaultAdvanceTimer = 3f;
+    
     void Awake()
     {
         Ins = this;
@@ -84,11 +86,11 @@ public class Referee : MonoBehaviour {
             case RefState.ACTORSELECT:
                 northTeam.isReady = false;
                 southTeam.isReady = false;
-                SetAutoReadyTimer(5f);
+                SetAutoReadyTimer(defaultAdvanceTimer);
                 break;
             case RefState.COUNTDOWN:
                 this.isReady = false;
-                SetAutoReadyTimer(5f);
+                SetAutoReadyTimer(defaultAdvanceTimer);
                 break;
             case RefState.PLAYING:
                 isReady = false;
