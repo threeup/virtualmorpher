@@ -46,7 +46,7 @@ public class GameFactory : MonoBehaviour
         SetupDefault(ga, owner, item);
         ga.abName = 'S';
         ga.Charge = ShieldStart;
-        ga.Charge = ShieldContinue;
+        ga.Activate = ShieldContinue;
         ga.Recover = ShieldFinish;  
         ga.Cooldown = FiveSecond; 
     }

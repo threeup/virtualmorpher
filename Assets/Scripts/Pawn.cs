@@ -53,7 +53,7 @@ public class Pawn : Actor
         if( rightHandAbility )
         {
             rightHandItem = Boss.RequestActor(Boss.actorWorld.shieldPrototype, body.rightHand, true);  
-            rightHandItem.gameObject.SetActive(false);   
+            //rightHandItem.gameObject.SetActive(false);   
             GameFactory.SetupShield(rightHandAbility, this, rightHandItem);  
         }
         if( wheelAbility )
