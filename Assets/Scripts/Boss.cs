@@ -1,0 +1,66 @@
+﻿using UnityEngine;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+public class Boss
+{
+    public static List<CamCtrl> camCtrls = new List<CamCtrl>();
+    public static List<UICtrl> uiCtrls = new List<UICtrl>();
+    public static ActorWorld actorWorld;
+    
+    public static Pawn RequestPawn(string name, Team team, Pawn.PawnType ptype)
+    {
+        return actorWorld.RequestPawn(name, team, ptype);
+    }
+    public static Actor RequestActor(GameObject prototype, Transform origin = null, bool parented = false)
+    {
+        return actorWorld.RequestActor(prototype, origin, parented);
+    }
+    public static GameObject RequestObject(GameObject prototype, Transform origin = null)
+    {
+        if( origin == null )
+        {
+            return GameObject.Instantiate(prototype) as GameObject;
+        }
+        else
+        {
+            return GameObject.Instantiate(prototype, origin.position, origin.rotation) as GameObject;
+        }
+    }
+    public static CamCtrl GetCamCtrl(int idx)
+    {
+        idx = Mathf.Min(idx, camCtrls.Count-1);
+        if( idx >= 0 )
+        {
+            return camCtrls[idx];
+        }
+        return null;
+    }
+
+    public static void ShowFloater(Transform target, int line, string text, Action<bool> onClick)
+    {
+        foreach(UICtrl uiCtrl in uiCtrls)
+        {
+            uiCtrl.ShowFloater(target, line, text, onClick);
+        }
+    }
+    
+    public static void HideFloater(Transform target, int line)
+    {
+        foreach(UICtrl uiCtrl in uiCtrls)
+        {
+            uiCtrl.HideFloater(target, line);
+        }
+    }
+    public static void HideFloater(Transform target)
+    {
+        foreach(UICtrl uiCtrl in uiCtrls)
+        {
+            uiCtrl.HideFloater(target);
+        }
+    }
+    
+    
+    
+}

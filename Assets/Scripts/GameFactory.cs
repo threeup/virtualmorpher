@@ -35,7 +35,9 @@ public class GameFactory : MonoBehaviour
     {
         SetupDefault(ga, owner, item);
         ga.abName = 'B';
+        ga.Charge = BulletCharge;
         ga.Activate = BulletActivate;
+        ga.Cooldown = ThreeSecond;
         
     }
     
@@ -43,24 +45,81 @@ public class GameFactory : MonoBehaviour
     {
         SetupDefault(ga, owner, item);
         ga.abName = 'S';
-        ga.Startup = ShieldStart;
-        ga.Recover = ShieldFinish;   
+        ga.Charge = ShieldStart;
+        ga.Charge = ShieldContinue;
+        ga.Recover = ShieldFinish;  
+        ga.Cooldown = FiveSecond; 
+    }
+    
+    public static void SetupNitro(GameAbility ga, Actor owner, Actor item)
+    {
+        SetupDefault(ga, owner, item);
+        ga.abName = 'N';
+        ga.Charge = TwoSecond;
+        ga.Activate = NitroStart;
+        ga.Recover = NitroFinish;   
+    }
+    
+    public static void OneSecond(GameAbility ga)
+	{
+		ga.lockTime = 2f;
+	}
+    
+    public static void TwoSecond(GameAbility ga)
+	{
+		ga.lockTime = 2f;
+	}
+    
+    public static void ThreeSecond(GameAbility ga)
+	{
+		ga.lockTime = 3f;
+	}
+    
+    public static void FiveSecond(GameAbility ga)
+	{
+		ga.lockTime = 3f;
+	}
+    
+    public static void BulletCharge(GameAbility ga)
+	{
+		ga.lockTime = 2f;
     }
     
     public static void BulletActivate(GameAbility ga)
 	{
-		Actor bullet = ActorWorld.Ins.RequestBullet(ga.bone);
-        bullet.SetForwardDestination(20f);
+		Actor bullet = Boss.actorWorld.RequestBullet(ga.bone);
+        bullet.SetForwardDestination();
+        ActorMotor motor = bullet.motor;
+        float chargeMaxTime = 2f;
+        float factor = Mathf.Lerp(0.5f, 1.5f, ga.chargeTime/chargeMaxTime);
+		motor.currentTopSpeed = motor.defaultTopSpeed*factor; 
 	}
     
     public static void ShieldStart(GameAbility ga)
 	{
-		
-        ga.item.gameObject.SetActive(true); 
+        ga.item.gameObject.SetActive(true);
+        ga.lockTime = 2f; 
+	}
+    public static void ShieldContinue(GameAbility ga)
+	{
+        ga.lockTime = Mathf.Max(1f,ga.chargeTime);
 	}
     
     public static void ShieldFinish(GameAbility ga)
 	{
 		ga.item.gameObject.SetActive(false); 
+	}
+    
+    public static void NitroStart(GameAbility ga)
+	{
+		ActorMotor motor = ga.owner.motor;
+        motor.currentTopSpeed = motor.defaultTopSpeed * 1.6f;
+        ga.lockTime = ga.chargeTime*3f;
+	}
+    
+    public static void NitroFinish(GameAbility ga)
+	{
+        ActorMotor motor = ga.owner.motor;
+		motor.currentTopSpeed = motor.defaultTopSpeed; 
 	}
 }

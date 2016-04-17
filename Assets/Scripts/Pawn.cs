@@ -1,4 +1,7 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using Vectrosity;
 
 public class Pawn : Actor
 {
@@ -17,8 +20,12 @@ public class Pawn : Actor
     public Actor leftHandItem;
     public GameAbility rightHandAbility;
     public Actor rightHandItem;
+    public GameAbility wheelAbility;
     
-    void Awake()
+    public List<IntVec2> path;
+    public VectorLine line;
+    
+    public override void Awake()
     {
         GameAbility[] abs = GetComponents<GameAbility>();
         if( abs.Length > 0 )
@@ -29,37 +36,84 @@ public class Pawn : Actor
         {
             rightHandAbility = abs[1];
         }
+        if( abs.Length > 2 )
+        {
+            wheelAbility = abs[2];
+        }
+        base.Awake();
     }
     
     public override void GoAlive()
     {
         if( leftHandAbility )
         {
-            leftHandItem = ActorWorld.Ins.CreateItem(ActorWorld.Ins.cannonPrototype, body.leftHand);
+            leftHandItem = Boss.RequestActor(Boss.actorWorld.cannonPrototype, body.leftHand, true);
             GameFactory.SetupBullet(leftHandAbility, this, leftHandItem);  
         }
         if( rightHandAbility )
         {
-            rightHandItem = ActorWorld.Ins.CreateItem(ActorWorld.Ins.shieldPrototype, body.rightHand);    
+            rightHandItem = Boss.RequestActor(Boss.actorWorld.shieldPrototype, body.rightHand, true);  
+            rightHandItem.gameObject.SetActive(false);   
             GameFactory.SetupShield(rightHandAbility, this, rightHandItem);  
         }
+        if( wheelAbility )
+        {
+            GameFactory.SetupNitro(wheelAbility, this, this);  
+        }
         
-        ActorWorld.Ins.Add(this);
+        Boss.actorWorld.Add(this);
         
         base.GoAlive();
     }
     
     public override void GoDead()
     {
-        ActorWorld.Ins.Remove(this);
+        Boss.actorWorld.Remove(this);
         base.GoDead();
     }
     
     
-    public void DoInput(float deltaTime, bool primary, bool secondary)
+    public void DoButtons(float deltaTime, bool primary, bool secondary, bool tertiary)
     {
-        leftHandAbility.ActionUpdate(deltaTime, primary);
-        rightHandAbility.ActionUpdate(deltaTime, secondary);
-        
+        if( leftHandAbility )
+        {
+            leftHandAbility.ActionUpdate(deltaTime, primary);
+        }
+        if( rightHandAbility )
+        {
+            rightHandAbility.ActionUpdate(deltaTime, secondary);
+        }
+        if( wheelAbility )
+        {
+            wheelAbility.ActionUpdate(deltaTime, tertiary);
+        }
     }
+    
+    public void UpdateMotion(float deltaTime)
+    {    
+        if( path != null )
+        {
+            IntVec2 vec = motor.transform.position.ToIntVec2();
+            while( path.Count > 0 && vec == path[0] )
+            {
+                path.RemoveAt(0);
+            }
+            if( path.Count > 0 )
+            {
+                IntVec2 next = path[0];
+                motor.SetDestination(next.ToVector3());
+                if( (line.points3.Count - 3) > path.Count )
+                {
+                    Texture lineTex = line.texture;
+                    float lineWidth = line.lineWidth;
+                    Color lc = line.color;
+                    LineUtils.BuildLine(this, lineTex, lineWidth);
+                    line.color = lc;
+                }
+            } 
+            
+        }
+    }
+    
+    
 }

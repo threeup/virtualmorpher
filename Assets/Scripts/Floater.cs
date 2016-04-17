@@ -7,7 +7,7 @@ public class Floater : MonoBehaviour
     public Transform target;
     public int line;
     public Text textField;
-    public CamCtrl camCtrl;
+    public UICtrl uiCtrl;
     public RectTransform rectTransform;
     
     public Action<bool> onClick;
@@ -31,7 +31,7 @@ public class Floater : MonoBehaviour
     {
         if(target != null)
         {
-            Vector2 floaterPos = camCtrl.cam.WorldToViewportPoint(target.position);
+            Vector2 floaterPos = uiCtrl.cam.WorldToViewportPoint(target.position);
             Vector2 anchoredPos = new Vector2(0,60);
             anchoredPos.y -= line*20;
             rectTransform.anchoredPosition = anchoredPos;;

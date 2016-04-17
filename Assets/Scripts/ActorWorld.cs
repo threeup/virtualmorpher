@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 public class ActorWorld : MonoBehaviour {
 
-    public static ActorWorld Ins = null;
-    
     public List<Pawn> activePawns = new List<Pawn>();
     public List<Actor> activeActors = new List<Actor>();
     
@@ -16,13 +14,11 @@ public class ActorWorld : MonoBehaviour {
     public GameObject shieldPrototype;
     public GameObject toolPrototype;
     public GameObject roboBodyPrototype;
-    public GameObject cursorPrototype;
-    public GameObject selectionPrototype;
     
 
 	void Awake() 
     {
-	    Ins = this;
+	    Boss.actorWorld = this;
 	}
     
     public Pawn RequestPawn(string name, Team team, Pawn.PawnType ptype)
@@ -57,20 +53,22 @@ public class ActorWorld : MonoBehaviour {
         return bullet;
     }
     
-    public Actor RequestOrb(Transform origin)
-    {
-        GameObject orbObject = GameObject.Instantiate(orbPrototype, origin.position, origin.rotation) as GameObject;
-        orbObject.name = orbPrototype.name+"-"+Time.frameCount;
-        Actor orb = orbObject.GetComponent<Actor>();
-        return orb;
-    }
     
-    public Actor CreateItem(GameObject prototype, Transform origin)
+    public Actor RequestActor(GameObject prototype, Transform origin = null, bool parented = false)
     {
-        GameObject itemObject = GameObject.Instantiate(prototype, Vector3.zero, Quaternion.identity) as GameObject;
-        if( origin )
+        GameObject itemObject;
+        if( origin == null )
         {
+            itemObject = GameObject.Instantiate(prototype, Vector3.zero, Quaternion.identity) as GameObject;
+        }
+        else if( parented )
+        {
+            itemObject = GameObject.Instantiate(prototype, Vector3.zero, Quaternion.identity) as GameObject;
             itemObject.transform.SetParent(origin, false);
+        }
+        else
+        {
+            itemObject = GameObject.Instantiate(prototype, origin.position, origin.rotation) as GameObject;
         }
         itemObject.name = prototype.name+"-"+Time.frameCount;
         Actor item = itemObject.GetComponent<Actor>();

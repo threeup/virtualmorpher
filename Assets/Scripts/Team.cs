@@ -14,14 +14,19 @@ public class Team : MonoBehaviour
     public Pawn alpha;
     public Pawn bravo;
     public Pawn charlie;
+    public List<Pawn> pawns = new List<Pawn>();
     
     Vector3 spawnPosition = Vector3.zero;
     Quaternion spawnRotation = Quaternion.LookRotation(Vector3.forward, Vector3.up);
     
+    public delegate void UpdateDelegate(float deltaTime);
+    public UpdateDelegate ProcessUpdate;
+    
     void Awake()
     {
-        spawnPosition = this.transform.position;
+        spawnPosition = this.transform.position - Vector3.right*5f;
         spawnRotation = this.transform.rotation;
+        ProcessUpdate = NoUpdate;
     }
     public Vector3 GetSpawnPosition()
     {
@@ -42,23 +47,32 @@ public class Team : MonoBehaviour
         {
             case Referee.RefState.SIDESELECT: 
                 score = 0;
+                ProcessUpdate = NoUpdate;
                 break;
             case Referee.RefState.SPAWNING:
-                alpha = ActorWorld.Ins.RequestPawn("PawnA",this, Pawn.PawnType.FAT);
+                alpha = Boss.RequestPawn("PawnA",this, Pawn.PawnType.FAT);
                 alpha.body.ApplyColor(teamColor);
-                bravo = ActorWorld.Ins.RequestPawn("PawnB",this, Pawn.PawnType.TALL);
+                pawns.Add(alpha);
+                bravo = Boss.RequestPawn("PawnB",this, Pawn.PawnType.TALL);
                 bravo.body.ApplyColor(teamColor);
-                charlie = ActorWorld.Ins.RequestPawn("PawnC",this, Pawn.PawnType.MED);
+                pawns.Add(bravo);
+                charlie = Boss.RequestPawn("PawnC",this, Pawn.PawnType.MED);
                 charlie.body.ApplyColor(teamColor);
+                pawns.Add(charlie);
                 isReady = true;
+                ProcessUpdate = NoUpdate;
                 break;
             case Referee.RefState.ACTORSELECT:
+                ProcessUpdate = NoUpdate;
                 break;
             case Referee.RefState.COUNTDOWN:
+                ProcessUpdate = NoUpdate;
                 break;
             case Referee.RefState.PLAYING:
+                ProcessUpdate = PlayingUpdate;
                 break;
             case Referee.RefState.FINISHED:
+                ProcessUpdate = NoUpdate;
                 break;
         }
     }
@@ -69,8 +83,6 @@ public class Team : MonoBehaviour
         isReady = true;
         Referee.Ins.SetAutoReadyTimer(5f);
         Referee.Ins.TempFloater(user+" Joined "+this.teamName);
-        user.camCtrl.cursor.body.ApplyColor(teamColor);
-        user.camCtrl.selection.body.ApplyColor(teamColor);
     }
     
     public void Remove(User user)
@@ -81,10 +93,24 @@ public class Team : MonoBehaviour
             isReady = false;
         }
         Referee.Ins.TempFloater(user+" Left "+this.teamName);
-        
-        user.camCtrl.cursor.body.ApplyColor(Color.white);
-        user.camCtrl.selection.body.ApplyColor(Color.white);
     }
     
+    public void NoUpdate(float deltaTime)
+    {
+        return;
+    }
+    
+    public void PlayingUpdate(float deltaTime)
+    {
+        foreach(Pawn pawn in pawns)
+        {
+            pawn.UpdateMotion(deltaTime);
+        }
+    }
+    
+    void Update()
+    {
+        ProcessUpdate(Time.deltaTime);
+    }
     
 }

@@ -2,14 +2,23 @@ using UnityEngine;
 
 public class ActorMotor : MonoBehaviour, IMotor
 {
-    public float topSpeed = 20f;
+    public float defaultTopSpeed = 1f;
+    public float currentTopSpeed = 1f;
+    public float rotationSpeed = 2f;
     float motorSpeed = 0f;
     public float GetSpeed() { return motorSpeed; }
     Vector3 motorDirection = Vector3.forward;
     public Vector3 GetDirection() { return motorDirection; }
     
+    Rigidbody rigbody;
+    
     Vector3 destination = Vector3.zero;
     
+    void Awake()
+    {
+        currentTopSpeed = defaultTopSpeed;
+        rigbody = GetComponent<Rigidbody>();
+    }
     void OnEnable()
     {
         MotorWorld.Ins.Add(this);
@@ -44,16 +53,24 @@ public class ActorMotor : MonoBehaviour, IMotor
     
     public void UpdateMotion(float deltaTime)
     {
-        Vector3 diff = destination - this.transform.position;
-        
-        float magn = diff.magnitude;
-        float nextStep = magn;
-        nextStep = Mathf.Min(nextStep, topSpeed*deltaTime);
-        motorSpeed = nextStep/deltaTime;
-        motorDirection = diff.normalized;  
-        
-        Vector3 nextPosition = this.transform.position + GetDirection()*GetSpeed()*deltaTime;
-        this.transform.position = nextPosition;
+        if( rigbody == null || rigbody.isKinematic )
+        {
+            Vector3 diff = destination - this.transform.position;
+            
+            float magn = diff.magnitude;
+            float nextStep = magn;
+            nextStep = Mathf.Min(nextStep, currentTopSpeed*deltaTime);
+            motorSpeed = nextStep/deltaTime;
+            motorDirection = diff.normalized;  
+            
+            Vector3 nextPosition = this.transform.position + GetDirection()*GetSpeed()*deltaTime;
+            this.transform.position = nextPosition;
+            
+            float step = rotationSpeed * deltaTime;
+            Vector3 nextDir = Vector3.RotateTowards(this.transform.forward, motorDirection, step, 0.0F);
+            this.transform.rotation = Quaternion.LookRotation(nextDir);
+        }
+
         
     }
 }

@@ -30,7 +30,7 @@ public class Referee : MonoBehaviour {
     float tempFloaterTimer = -1f;
     bool isReady = true;
     
-    float defaultAdvanceTimer = 3f;
+    float defaultAdvanceTimer = 0.2f;
     
     void Awake()
     {
@@ -46,7 +46,7 @@ public class Referee : MonoBehaviour {
     IEnumerator SetupRoutine()
     {
         yield return null;
-        GotoState(RefState.SIDESELECT);
+        GotoState(RefState.SPAWNING);
     }
     
     void GotoState(RefState state)
@@ -56,10 +56,15 @@ public class Referee : MonoBehaviour {
             return;
         }
         refState = state;
-        CamCtrl.First.ShowFloater(this.transform, 0, refState.ToString(), null);
+        Boss.ShowFloater(this.transform, 0, refState.ToString(), null);
         switch(refState)
         {
-            case RefState.SIDESELECT:
+            case RefState.SPAWNING:
+                MenuCtrl.Ins.GoSideSelect(false);
+                northTeam.isReady = false;
+                southTeam.isReady = false;
+                break;
+            case RefState.ACTORSELECT:
                 northTeam.isReady = false;
                 southTeam.isReady = false;
                 int localUsers = 0;
@@ -67,7 +72,7 @@ public class Referee : MonoBehaviour {
                 {
                     if( user.IsLocal )
                     {
-                        user.AssignCamera(localUsers==0 ? CamCtrl.First : CamCtrl.Second);
+                        user.AssignCamera(Boss.GetCamCtrl(localUsers));
                         localUsers++;
                     }
                     else
@@ -78,23 +83,13 @@ public class Referee : MonoBehaviour {
                 MenuCtrl.Ins.GoSideSelect(true);
                 MenuCtrl.Ins.GoEndOfGame(false);
                 break;
-            case RefState.SPAWNING:
-                MenuCtrl.Ins.GoSideSelect(false);
-                northTeam.isReady = false;
-                southTeam.isReady = false;
-                break;
-            case RefState.ACTORSELECT:
-                northTeam.isReady = false;
-                southTeam.isReady = false;
-                SetAutoReadyTimer(defaultAdvanceTimer);
-                break;
             case RefState.COUNTDOWN:
                 this.isReady = false;
                 SetAutoReadyTimer(defaultAdvanceTimer);
                 break;
             case RefState.PLAYING:
                 isReady = false;
-                orb = ActorWorld.Ins.RequestOrb(orbDropPoint);
+                orb = Boss.RequestActor(Boss.actorWorld.orbPrototype, orbDropPoint, false);
                 isReady = true;
                 break;    
             case RefState.FINISHED:
@@ -115,12 +110,6 @@ public class Referee : MonoBehaviour {
     {
         switch(refState)
         {
-            case RefState.SIDESELECT:
-                if(isReady && northTeam.isReady && southTeam.isReady)
-                {
-                    GotoState(RefState.SPAWNING);
-                }
-                break;
             case RefState.SPAWNING:
                 if(isReady && northTeam.isReady && southTeam.isReady)
                 {
@@ -169,12 +158,12 @@ public class Referee : MonoBehaviour {
                 southTeam.isReady = true;
                 isReady = true;
                 autoReadyTimer = -1f;
-                CamCtrl.First.HideFloater(this.transform, 1);
+                Boss.HideFloater(this.transform, 1);
             }
             else
             {
                 int rounded = (int)Mathf.Round(autoReadyTimer*10);
-                CamCtrl.First.ShowFloater(this.transform, 1, "Starting in "+rounded/10f, null);
+                Boss.ShowFloater(this.transform, 1, "Starting in "+rounded/10f, null);
             }
             
         }
@@ -183,7 +172,7 @@ public class Referee : MonoBehaviour {
             tempFloaterTimer -= Time.deltaTime;
             if( tempFloaterTimer <= 0f )
             {
-                CamCtrl.First.HideFloater(this.transform, 2);
+                Boss.HideFloater(this.transform, 2);
             }
         }
     }
@@ -198,7 +187,7 @@ public class Referee : MonoBehaviour {
     
     public void TempFloater(string txt)
     {
-        CamCtrl.First.ShowFloater(this.transform, 2, txt, null);
+        Boss.ShowFloater(this.transform, 2, txt, null);
         tempFloaterTimer = 3f;
     }
 }

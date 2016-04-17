@@ -3,25 +3,26 @@ using UnityEngine;
 public class Actor : MonoBehaviour
 {
     public ActorBody body;
-    ActorMotor motor;
+    public ActorMotor motor;
     
-    void Awake()
+    public virtual void Awake()
     {
         motor = GetComponent<ActorMotor>();
     }
     
     public virtual void GoAlive()
     {
-        ActorWorld.Ins.Add(this);
+        Boss.actorWorld.Add(this);
     }
     
     public virtual void GoDead()
 {
-        ActorWorld.Ins.Remove(this);
+        Boss.actorWorld.Remove(this);
     }
     
     public void SetAxis(Vector2 axis)
     {
+        
         motor.SetRelativeDestination(axis);
     }
     public void SetAxis(Vector3 axis)
@@ -40,9 +41,9 @@ public class Actor : MonoBehaviour
         motor.SetDestination(adjusted);
     }
     
-    public void SetForwardDestination(float amount)
+    public void SetForwardDestination()
     {
-        motor.SetRelativeDestination(this.transform.forward * amount);
+        motor.SetRelativeDestination(this.transform.forward * 999f);
     }
 
 }

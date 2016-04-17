@@ -7,8 +7,10 @@ public class User : MonoBehaviour
     public bool IsLocal { get { return isLocal; } } 
     
     public CamCtrl camCtrl;
-    Actor cursor;
-    Actor selection;
+    public UICtrl uiCtrl;
+    Actor stickCursor;
+    Actor activeCursor;
+    Actor floorCursor;
     public Team team;
     Team desiredTeam;
 
@@ -26,32 +28,38 @@ public class User : MonoBehaviour
     public void AssignCamera(CamCtrl camCtrl)
     {
         this.camCtrl = camCtrl;
+        if( camCtrl )
+        {
+            this.uiCtrl = camCtrl.uiCtrl;
+            this.stickCursor = uiCtrl.stickCursor;
+            this.activeCursor = uiCtrl.activeCursor;
+            this.floorCursor = uiCtrl.floorCursor;
+        }
+        else
+        {
+            this.uiCtrl = null;
+            this.stickCursor = null;
+            this.activeCursor = null;
+            this.floorCursor = null;
+        }
     }
     
     public void HandleRefStateChange(Referee.RefState state)
     {
         switch(state)
         {
-            case Referee.RefState.SIDESELECT: 
-                this.cursor = camCtrl ? camCtrl.cursor : null;
-                this.selection = camCtrl ? camCtrl.selection : null;
-                if( isLocal )
-                {
-                    camCtrl.pointsOfInterest.Add(cursor.transform);
-                    camCtrl.pointsOfInterest.Add(Referee.Ins.transform);
-                    ProcessInput = SideSelectInput;
-                } 
-                break;
             case Referee.RefState.SPAWNING:
                 if( isLocal )
                 {
                     ProcessInput = NoInput;
-                    camCtrl.HideFloater(selection.transform, 0);
                 }
                 break;
             case Referee.RefState.ACTORSELECT:
                 if( isLocal )
                 {
+                    uiCtrl.HideFloater(floorCursor.transform, 0);
+                    camCtrl.pointsOfInterest.Add(stickCursor.transform);
+                    camCtrl.pointsOfInterest.Add(Referee.Ins.transform);
                     ProcessInput = ActorSelectInput;
                 }
                 break;
@@ -59,7 +67,7 @@ public class User : MonoBehaviour
                 if( isLocal )
                 {
                     ProcessInput = NoInput;
-                    camCtrl.HideFloater(selection.transform, 0);
+                    uiCtrl.HideFloater(floorCursor.transform, 0);
                     camCtrl.pointsOfInterest.Clear();
                     camCtrl.pointsOfInterest.Add(team.alpha.transform);
                     camCtrl.pointsOfInterest.Add(team.bravo.transform);
@@ -90,24 +98,34 @@ public class User : MonoBehaviour
     
     public bool ActorSelectInput(float deltaTime, InputCtrl.InputParams inputs)
     {
-        if( inputs.button[0] )
-        {
-            
-        }
+        CheckStickCursor(inputs);
+        CheckSideSelect(inputs);
+        CheckSelectActor(inputs);
         return true;
     }
-    public bool SideSelectInput(float deltaTime, InputCtrl.InputParams inputs)
+    
+    
+    public bool PlayingInput(float deltaTime, InputCtrl.InputParams inputs)
     {
-        if( inputs.button[0] )
+        CheckButtons(deltaTime, inputs);
+        CheckStickCursor(inputs);
+        CheckSelectActor(inputs);
+        return true;
+    
+    }
+    
+    void CheckSideSelect(InputCtrl.InputParams inputs)
+    {
+        if( cockpit == null && inputs.button[0] )
         {
             desiredTeam = null;
-            if( selection.transform.position.z < -1f )
-            {
-                desiredTeam = Referee.Ins.southTeam;
-            }
-            else if( selection.transform.position.z > 1f )
+            if( floorCursor.transform.position.z < -1f )
             {
                 desiredTeam = Referee.Ins.northTeam;
+            }
+            else if( floorCursor.transform.position.z > 1f )
+            {
+                desiredTeam = Referee.Ins.southTeam;
             } 
 
             if( !desiredTeam )
@@ -115,30 +133,19 @@ public class User : MonoBehaviour
                 if( team )
                 {
                     Action<bool> floaterSucess = success => JoinTeam(null);
-                    camCtrl.ShowFloater(selection.transform, 0, "Leave "+team+"?", floaterSucess);
+                    uiCtrl.ShowFloater(floorCursor.transform, 0, "Leave "+team+"?", floaterSucess);
                 }
                 else
                 {
-                    camCtrl.HideFloater(selection.transform, 0);
+                    uiCtrl.HideFloater(floorCursor.transform, 0);
                 }
             }
             else if( desiredTeam != team )
             {
                 Action<bool> floaterSucess = success => JoinTeam(desiredTeam);
-                camCtrl.ShowFloater(selection.transform, 0, "Join "+desiredTeam.teamName+"?", floaterSucess);
+                uiCtrl.ShowFloater(floorCursor.transform, 0, "Join "+desiredTeam.teamName+"?", floaterSucess);
             }
-            camCtrl.ClickHeld(cursor.transform.position);
         }
-        if( inputs.buttonDown[0] )
-        {
-            camCtrl.ClickDown(cursor.transform.position);
-        }
-        if( inputs.buttonUp[0] )
-        {
-            camCtrl.ClickUp(cursor.transform.position);
-        }
-        cursor.SetAxis(inputs.leftAxis);
-        return true;
     }
     
     void JoinTeam(Team nextTeam)
@@ -153,40 +160,63 @@ public class User : MonoBehaviour
             team.Add(this);
             if( isLocal )
             {
-                camCtrl.cursor.body.ApplyColor(team.teamColor);
-                camCtrl.selection.body.ApplyColor(team.teamColor);
+                stickCursor.body.ApplyColor(team.teamColor);
+                activeCursor.body.ApplyColor(team.teamColor);
+                floorCursor.body.ApplyColor(team.teamColor);
             }
         }
         else
         {
             if( isLocal )
             {
-                camCtrl.cursor.body.ApplyColor(Color.white);
-                camCtrl.selection.body.ApplyColor(Color.white);
+                stickCursor.body.ApplyColor(Color.white);
+                activeCursor.body.ApplyColor(Color.white);
+                floorCursor.body.ApplyColor(Color.white);
             }
         }
     }
     
-    public bool ReadyInput(float deltaTime, InputCtrl.InputParams inputs)
-    {
-        return true;
-    }
     
-    public bool PlayingInput(float deltaTime, InputCtrl.InputParams inputs)
+    void CheckButtons(float deltaTime, InputCtrl.InputParams inputs)
     {
         if( cockpit != null )
         {
-            cockpit.SetAxis(inputs.leftAxis);
-            cockpit.DoInput(deltaTime, inputs.button[0], inputs.button[1]);
-            cursor.SetAxis(Vector2.zero);
+            bool directMode = false;
+            if( directMode )
+            {
+                cockpit.SetAxis(inputs.leftAxis);
+                
+            }
+            cockpit.DoButtons(deltaTime, inputs.button[2], inputs.button[3], inputs.button[4]);
         }
-        else
+    }
+    
+    void CheckStickCursor(InputCtrl.InputParams inputs)
+    {
+        if( cockpit != null )
         {
-            cursor.SetAxis(inputs.leftAxis);
+            activeCursor.SetAxis(cockpit.transform.position - activeCursor.transform.position);
         }
-        selection.SetAxis(cursor.transform.position - selection.transform.position);
-        if( inputs.buttonDown[2] )
+        floorCursor.SetAxis(stickCursor.transform.position - floorCursor.transform.position);
+        if( inputs.button[0] )
         {
+            uiCtrl.ClickHeld(stickCursor.transform.position);
+        }
+        if( inputs.buttonDown[0] )
+        {
+            uiCtrl.ClickDown(stickCursor.transform.position);
+        }
+        if( inputs.buttonUp[0] )
+        {
+            uiCtrl.ClickUp(stickCursor.transform.position);
+        }
+    }
+    
+    void CheckSelectActor(InputCtrl.InputParams inputs)
+    {
+        if( team && inputs.buttonDown[1] )
+        {
+            //Pawn lastCockpit = cockpit;
             if( cockpit == null )
             {
                 cockpit = team.alpha;
@@ -203,9 +233,10 @@ public class User : MonoBehaviour
             {
                 cockpit = team.alpha;
             }
+            uiCtrl.SelectCockpit(team, cockpit);
             camCtrl.keyInterest = cockpit != null ? cockpit.transform : null;
         }
-        return true;
     }
+    
      
 }
