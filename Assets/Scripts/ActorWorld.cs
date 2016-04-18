@@ -17,7 +17,9 @@ public class ActorWorld : MonoBehaviour {
     
     public GameObject towerPrototype;
     public GameObject towerBodyPrototype;
-    public GameObject giantTowerBodyPrototype;  
+    public GameObject giantTowerBodyPrototype;
+    
+    public List<GameObject> hatPrototypes = new List<GameObject>();  
     
     public List<GameObject> garbage = new List<GameObject>(); 
     public float garbageTimer = 7f; 

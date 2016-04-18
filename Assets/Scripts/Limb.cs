@@ -63,9 +63,9 @@ public class Limb : MonoBehaviour
         {
             return;
         }
-        if( otherLimb.owner == null )
+        if( owner == null || otherLimb.owner == null )
         {
-            Debug.LogError("Detached limb "+other);
+            //Debug.LogError("Detached limb "+other);
             return;
         }
         Vector3 diff = otherLimb.transform.position - this.transform.position;

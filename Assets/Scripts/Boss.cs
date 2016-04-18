@@ -24,6 +24,12 @@ public class Boss
     {
         return actorWorld.RequestActor(prototype, origin, parented);
     }
+    
+    public static GameObject RequestHat()
+    {
+        GameObject prototype = actorWorld.hatPrototypes[UnityEngine.Random.Range(0,actorWorld.hatPrototypes.Count)];
+        return RequestObject(prototype, null);
+    }
     public static GameObject RequestObject(GameObject prototype, Transform origin = null)
     {
         if( origin == null )

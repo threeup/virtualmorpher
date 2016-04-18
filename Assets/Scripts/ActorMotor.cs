@@ -189,10 +189,12 @@ public class ActorMotor : MonoBehaviour, IMotor
             {
                 SetPossessTeam(possessActor.team);
                 Boss.referee.TempFloater("Grabbed by "+possessActor.name);
+                actor.body.transform.localScale = 0.5f*Vector3.one;
             }
             else
             {
                 Boss.referee.TempFloater("Dropped!");
+                actor.body.transform.localScale = 1f*Vector3.one;
                 possessTeamTimer = 2f;
             }
         }
@@ -216,10 +218,12 @@ public class ActorMotor : MonoBehaviour, IMotor
         if( team )
         {
             actor.body.ApplyColor(Color.Lerp(Color.white, team.teamColor, 0.5f));
+            actor.body.ApplyEmission(Color.Lerp(Color.black, team.teamColor, 0.5f));
         }
         else
         {
             actor.body.ApplyColor(Color.white);
+            actor.body.ApplyEmission(Color.white);
             possessTeamTimer = 2f;
         }
     }

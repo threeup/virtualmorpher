@@ -63,10 +63,13 @@ public class Team : MonoBehaviour
                 break;
             case Referee.RefState.SPAWNING:
                 alpha = Boss.RequestPawn("PawnA",this, Pawn.PawnType.FAT);
+                alpha.SetHat(Boss.RequestHat());
                 pawns.Add(alpha);
                 bravo = Boss.RequestPawn("PawnB",this, Pawn.PawnType.TALL);
+                bravo.SetHat(Boss.RequestHat());
                 pawns.Add(bravo);
                 charlie = Boss.RequestPawn("PawnC",this, Pawn.PawnType.MED);
+                charlie.SetHat(Boss.RequestHat());
                 pawns.Add(charlie);
                 isReady = true;
                 ProcessUpdate = NoUpdate;

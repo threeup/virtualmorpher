@@ -133,7 +133,7 @@ public class GameFactory : MonoBehaviour
         {
             return;
         }
-        float bounceAway = 5f;
+        float bounceAway = 3f;
         
         ActorMotor otherMotor = other.owner.motor;
         if( otherMotor.possessTeam != null && 
@@ -196,6 +196,7 @@ public class GameFactory : MonoBehaviour
         
         //dont use origin of shield
         diff = other.transform.position - src.owner.transform.position;
+        
         ActorMotor otherMotor = other.owner.motor;
         otherMotor.RigidAdd(diff.normalized*bounceAway);
     }

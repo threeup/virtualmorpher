@@ -5,6 +5,7 @@ public class Actor : MonoBehaviour
     public ActorBody body;
     public ActorMotor motor;
     public Team team;
+    GameObject hat;
     
     public float GetSpeed() { return motor.GetSpeed(); }
     
@@ -19,7 +20,9 @@ public class Actor : MonoBehaviour
     }
     
     public virtual void GoDead()
-{
+    {
+        Destroy(this.hat);
+        this.hat = null;
         Boss.actorWorld.Remove(this);
     }
     
@@ -64,6 +67,13 @@ public class Actor : MonoBehaviour
             case Limb.LimbType.WHEEL: limb.ProcessBounce = GameFactory.WheelBounce; break;
             default: break;
         }
+    }
+    
+    public void SetHat(GameObject hat)
+    {
+        this.hat = hat;
+        hat.transform.parent = body.head;
+        hat.transform.localPosition = Vector3.up*0.5f;
     }
     
 

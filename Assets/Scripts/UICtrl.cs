@@ -15,10 +15,18 @@ public class UICtrl : MonoBehaviour
     
     public GameObject hudcanvas;
     public GameObject floaterPrototype;
+    public GameObject iconPrototype;
     public GameObject stickCursorPrototype;
     public GameObject activeCursorPrototype;
     public GameObject floorCursorPrototype;
+    public GameObject fastIconPrototype;
+    public GameObject upIconPrototype;
+    public GameObject linesIconPrototype;
     List<Floater> floaters = new List<Floater>();
+    
+    FloatIcon iconPri;
+    FloatIcon iconSec;
+    FloatIcon iconTer;
     
     float floorCursorExpireTimer = -1f;
     
@@ -37,9 +45,10 @@ public class UICtrl : MonoBehaviour
 	void Awake () {
 	    camCtrl = this.GetComponent<CamCtrl>();
 	    cam = this.GetComponent<Camera>();
+        GameObject go;
         for(int i=0; i<8;++i)
         {
-            GameObject go = Boss.RequestObject(this.floaterPrototype);
+            go = Boss.RequestObject(this.floaterPrototype);
             go.name = "Floater"+i;
             go.transform.SetParent(hudcanvas.transform);
             go.SetActive(false);
@@ -48,6 +57,28 @@ public class UICtrl : MonoBehaviour
             floaters.Add(floater);
         }
         
+        go = Boss.RequestObject(this.upIconPrototype);
+        go.name = "UpIcon";
+        go.transform.SetParent(hudcanvas.transform);
+        go.SetActive(false);
+        iconPri = go.GetComponent<FloatIcon>();
+        iconPri.offset = -20;
+        iconPri.uiCtrl = this;
+        
+        go = Boss.RequestObject(this.fastIconPrototype);
+        go.name = "FastIcon";
+        go.transform.SetParent(hudcanvas.transform);
+        go.SetActive(false);
+        iconSec = go.GetComponent<FloatIcon>();
+        iconSec.uiCtrl = this;
+        
+        go = Boss.RequestObject(this.linesIconPrototype);
+        go.name = "LinesIcon";
+        go.transform.SetParent(hudcanvas.transform);
+        go.SetActive(false);
+        iconTer = go.GetComponent<FloatIcon>();
+        iconTer.offset = 20;
+        iconTer.uiCtrl = this;
         
         int linesX = 9;
         int linesZ = 18;
@@ -239,6 +270,13 @@ public class UICtrl : MonoBehaviour
                 activePawn.line.color = new Color(lc.r,lc.g,lc.b, 0.3f);
             }
             activePawn = cockpit;
+            
+            iconPri.target = activePawn.body.head;
+            iconPri.targetAbility = activePawn.leftHandAbility; 
+            iconSec.target = activePawn.body.head;
+            iconSec.targetAbility = activePawn.rightHandAbility;
+            iconTer.target = activePawn.body.head;
+            iconTer.targetAbility = activePawn.wheelAbility;
             if( activePawn != null && activePawn.line != null )
             {
                 Color lc = activePawn.line.color;
@@ -250,6 +288,9 @@ public class UICtrl : MonoBehaviour
             }
             activePath = activePawn.path;
         }
+        iconPri.gameObject.SetActive(editPathMode);
+        iconSec.gameObject.SetActive(editPathMode);
+        iconTer.gameObject.SetActive(editPathMode);
     }
     
     public void KillPathLines()

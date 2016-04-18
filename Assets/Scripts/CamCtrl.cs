@@ -8,6 +8,7 @@ public class CamCtrl : MonoBehaviour, IMotor {
     
     public Transform keyInterest = null;
     public List<Transform> pointsOfInterest = new List<Transform>();
+    public List<Vector3> posOfInterest = new List<Vector3>();
     public Camera cam; 
     public UICtrl uiCtrl; 
     public Plane plane = new Plane(Vector3.up, Vector3.zero);
@@ -51,38 +52,85 @@ public class CamCtrl : MonoBehaviour, IMotor {
     {
         Ray ray;
         float distance = 0; 
-        Vector2 midPoint = new Vector2(cam.pixelWidth/2,cam.pixelHeight/2);
-        ray = cam.ScreenPointToRay(midPoint);
+        Vector2 camPoint = new Vector2(cam.pixelWidth/2,cam.pixelHeight/2);
+        ray = cam.ScreenPointToRay(camPoint);
         if( plane.Raycast(ray, out distance) )
         {
             currentCenter = ray.GetPoint(distance);
         }
-        averageInterest = Vector3.zero;
-	    foreach(Transform point in pointsOfInterest)
+        camPoint = new Vector2(0,cam.pixelHeight/2);
+        ray = cam.ScreenPointToRay(camPoint);
+        Vector3 worldLeft = Vector3.zero;
+        if( plane.Raycast(ray, out distance) )
         {
-            Vector3 interestingPosition = point.position;
+            worldLeft = ray.GetPoint(distance);
+        }
+        camPoint = new Vector2(cam.pixelWidth,cam.pixelHeight/2);
+        ray = cam.ScreenPointToRay(camPoint);
+        Vector3 worldRight = Vector3.zero;
+        if( plane.Raycast(ray, out distance) )
+        {
+            worldRight = ray.GetPoint(distance);
+        }
+        camPoint = new Vector2(cam.pixelWidth/2,cam.pixelHeight);
+        ray = cam.ScreenPointToRay(camPoint);
+        Vector3 worldTop = Vector3.zero;
+        if( plane.Raycast(ray, out distance) )
+        {
+            worldTop = ray.GetPoint(distance);
+        }
+        camPoint = new Vector2(cam.pixelWidth/2,0);
+        ray = cam.ScreenPointToRay(camPoint);
+        Vector3 worldBottom = Vector3.zero;
+        if( plane.Raycast(ray, out distance) )
+        {
+            worldBottom = ray.GetPoint(distance);
+        }
+
+        
+        averageInterest = Vector3.zero;
+        posOfInterest.Clear();
+        if( keyInterest )
+        {
+            posOfInterest.Add(keyInterest.position);
+        }
+        Rect screenRect = new Rect(0,0, Screen.width, Screen.height);
+        if (screenRect.Contains(Input.mousePosition))
+        {
+            if( Input.mousePosition.y < cam.pixelHeight*0.1)
+            {
+                posOfInterest.Add(worldBottom);
+            }
+            if( Input.mousePosition.y > cam.pixelHeight*0.9)
+            {
+                posOfInterest.Add(worldTop);
+            }
+            if( Input.mousePosition.x < cam.pixelWidth*0.1)
+            {
+                posOfInterest.Add(worldLeft);
+            }
+            if( Input.mousePosition.x > cam.pixelWidth*0.9)
+            {
+                posOfInterest.Add(worldRight);
+            }
+        }
+	    foreach(Vector3 point in posOfInterest)
+        {
+            Vector3 interestingPosition = point;
             interestingPosition.y = 0;
             averageInterest += interestingPosition;
         }
-        averageInterest /= pointsOfInterest.Count;
+        averageInterest /= posOfInterest.Count;
         float maxDistToInterest = 0f; 
-        foreach(Transform point in pointsOfInterest)
+        foreach(Vector3 point in posOfInterest)
         {
-            float sqrMag = (point.position - averageInterest).sqrMagnitude;
+            float sqrMag = (point - averageInterest).sqrMagnitude;
             if( sqrMag > maxDistToInterest * maxDistToInterest )
             {
                 maxDistToInterest = Mathf.Sqrt(sqrMag);
             }
         }
-        Vector3 velocity = Vector3.zero;
-        if( keyInterest == null )
-        {
-            velocity = averageInterest - currentCenter;
-        }
-        else
-        {
-            velocity = keyInterest.position - currentCenter;
-        }
+        Vector3 velocity = averageInterest - currentCenter;
         float desiredZoomLevel = Mathf.Clamp( maxDistToInterest, minZoom, maxZoom);
         velocity.y = desiredZoomLevel - currentZoomLevel;
         SetRelativeDestination(velocity);

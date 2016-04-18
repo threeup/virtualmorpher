@@ -7,6 +7,7 @@ public class ActorBody : MonoBehaviour
     
     public Transform actionPoint;
     public Transform coreCollision;
+    public Transform head;
     
     [SerializeField]
     Transform leftArm;
@@ -92,6 +93,18 @@ public class ActorBody : MonoBehaviour
         if( primaryMaterial )
         {
             primaryMaterial.SetColor("_Color",color);
+        }
+    }
+    
+    public void ApplyEmission(Color color)
+    {
+        if( primaryMaterial == null )
+        {
+            SetupMaterials();
+        }
+        if( primaryMaterial )
+        {
+            primaryMaterial.SetColor("_EmissionColor",color);
         }
     }
     
