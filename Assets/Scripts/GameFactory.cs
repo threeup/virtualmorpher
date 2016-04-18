@@ -116,7 +116,7 @@ public class GameFactory : MonoBehaviour
     public static void NitroStart(GameAbility ga)
 	{
 		ActorMotor motor = ga.owner.motor;
-        motor.currentTopSpeed = motor.defaultTopSpeed * 1.6f;
+        motor.currentTopSpeed = motor.defaultTopSpeed * 2.6f;
         ga.lockTime = ga.chargeTime*3f;
 	}
     
@@ -137,7 +137,7 @@ public class GameFactory : MonoBehaviour
         
         ActorMotor otherMotor = other.owner.motor;
         if( otherMotor.possessTeam != null && 
-            otherMotor.possessTeam != other.owner.team )
+            otherMotor.possessTeam != src.owner.team )
         {
             src.owner.team.ExplodeTower(src.owner);
         }
@@ -150,6 +150,10 @@ public class GameFactory : MonoBehaviour
     {
         ActorMotor srcMotor = src.owner.motor;
         if( srcMotor.possessActor == other.owner )
+        {
+            return;
+        }
+        if( other.owner == null )
         {
             return;
         }
@@ -181,6 +185,10 @@ public class GameFactory : MonoBehaviour
         float bounceAway = 4f;
         if( other.limbType == Limb.LimbType.BALL)
         {
+            if( other.owner == null || src.owner == null )
+            {
+                return;
+            }
             ActorMotor srcMotor = src.owner.motor;
             float slowSpeed = 4f;
             bool isThrow = srcMotor.GetSpeed() < slowSpeed;
@@ -202,30 +210,50 @@ public class GameFactory : MonoBehaviour
     }
     public static void HeadBounce(Limb src, Limb other, Vector3 diff)
     {
+        if( other.owner == null || src.owner == null )
+        {
+            return;
+        }
         float bounceAway = 2f;
         ActorMotor otherMotor = other.owner.motor;
         otherMotor.RigidAdd(diff.normalized*bounceAway);
     }
     public static void TorsoBounce(Limb src, Limb other, Vector3 diff)
     {
+        if( other.owner == null || src.owner == null )
+        {
+            return;
+        }
         float bounceAway = 2f;
         ActorMotor otherMotor = other.owner.motor;
         otherMotor.RigidAdd(diff.normalized*bounceAway);
     }
     public static void LeftArmBounce(Limb src, Limb other, Vector3 diff)
     {
+        if( other.owner == null || src.owner == null )
+        {
+            return;
+        }
         float bounceAway = 2f;
         ActorMotor otherMotor = other.owner.motor;
         otherMotor.RigidAdd(diff.normalized*bounceAway);
     }
     public static void RightArmBounce(Limb src, Limb other, Vector3 diff)
     {
+        if( other.owner == null || src.owner == null )
+        {
+            return;
+        }
         float bounceAway = 2f;
         ActorMotor otherMotor = other.owner.motor;
         otherMotor.RigidAdd(diff.normalized*bounceAway);
     }
     public static void WheelBounce(Limb src, Limb other, Vector3 diff)
     {
+        if( other.owner == null || src.owner == null )
+        {
+            return;
+        }
         float bounceAway = 2f;
         ActorMotor otherMotor = other.owner.motor;
         otherMotor.RigidAdd(diff.normalized*bounceAway);

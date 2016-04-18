@@ -17,7 +17,7 @@ public class Cheats : MonoBehaviour
         float scrollAxis = Input.GetAxis("Mouse ScrollWheel");
         if( Mathf.Abs(scrollAxis) > 0.1 )
         {
-            slider.value += 0.1f*scrollAxis/1000f;
+            slider.value += 0.03f*scrollAxis/1000f;
         }
     }  
     

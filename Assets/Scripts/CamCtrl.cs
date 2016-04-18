@@ -120,7 +120,10 @@ public class CamCtrl : MonoBehaviour, IMotor {
             interestingPosition.y = 0;
             averageInterest += interestingPosition;
         }
-        averageInterest /= posOfInterest.Count;
+        if( posOfInterest.Count > 0 )
+        {
+            averageInterest /= posOfInterest.Count;
+        }
         float maxDistToInterest = 0f; 
         foreach(Vector3 point in posOfInterest)
         {
@@ -138,7 +141,7 @@ public class CamCtrl : MonoBehaviour, IMotor {
     
     public void SetRelativeDestination(Vector3 amount)
     {
-        float minDist = 6f;
+        float minDist = 3f;
         float magn = amount.magnitude;
         if( magn < minDist )
         {

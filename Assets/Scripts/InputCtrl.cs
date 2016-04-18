@@ -15,16 +15,16 @@ public class InputCtrl : MonoBehaviour {
         public InputParams(Vector2 axis)
         {
             leftAxis = axis;
-            button = new bool[5];
-            buttonDown = new bool[5];
-            buttonUp = new bool[5];
+            button = new bool[6];
+            buttonDown = new bool[6];
+            buttonUp = new bool[6];
         }
         
         
         public void Reset()
         {
             leftAxis = Vector2.zero;
-            for(int i=0; i<5;++i)
+            for(int i=0; i<6;++i)
             {
                 button[i] = false;
                 buttonDown[i] = false;
@@ -35,7 +35,7 @@ public class InputCtrl : MonoBehaviour {
         public void Clone(InputParams other)
         {
             leftAxis = other.leftAxis;
-            for(int i=0; i<5;++i)
+            for(int i=0; i<6;++i)
             {
                 button[i] = other.button[i];
                 buttonDown[i] = other.buttonDown[i];
@@ -84,7 +84,7 @@ public class InputCtrl : MonoBehaviour {
         {
             inputParams.button[0] = true;
         }
-        if (Input.GetMouseButton(1) || Input.GetKey(KeyCode.Space))
+        if (Input.GetMouseButton(1))
         {
             inputParams.button[1] = true;
         }
@@ -100,7 +100,11 @@ public class InputCtrl : MonoBehaviour {
         {
             inputParams.button[4] = true;
         }
-        for(int i=0; i<5; ++i)
+        if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.Tab))
+        {
+            inputParams.button[5] = true;
+        }
+        for(int i=0; i<6; ++i)
         {
             if( !lastInputParams.button[i] && inputParams.button[i] )
             {

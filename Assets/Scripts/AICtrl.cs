@@ -15,6 +15,10 @@ public class AICtrl : MonoBehaviour
     float actionTimer = 2f;
     float defaultActionTimer = 2f;
     
+    bool primaryButton;
+    bool secondaryButton;
+    bool tertiaryButton;
+    
     void Awake()
     {
         user = GetComponent<User>();
@@ -30,7 +34,7 @@ public class AICtrl : MonoBehaviour
         newPawnTimer -= deltaTime;
         if( newPawnTimer < 0)
         {
-            user.SelectActor();
+            user.SelectNextActor();
             newPawnTimer = defaultNewPawnTimer;
         }
         
@@ -42,12 +46,18 @@ public class AICtrl : MonoBehaviour
         }
         
         actionTimer -= deltaTime;
+        primaryButton = false;
+        secondaryButton = false;
+        tertiaryButton = false;
         if( actionTimer < 0 )
         {
             int rand = UnityEngine.Random.Range(0,5);
-            user.cockpit.DoButtons(deltaTime, rand==2, rand==3, rand==4);
+            primaryButton = rand==2;
+            secondaryButton = rand==3;
+            tertiaryButton = rand==4;
             actionTimer = defaultActionTimer;
         }
+        user.DoButtons(deltaTime, primaryButton, secondaryButton, tertiaryButton);
 	}
     
     Vector3 GetDestination(Pawn pawn)

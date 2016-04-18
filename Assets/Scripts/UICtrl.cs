@@ -201,17 +201,16 @@ public class UICtrl : MonoBehaviour
     
     public void ClickHeld(Vector3 position)
     {
-        floorCursor.SetDestination(position);
-        floorCursorExpireTimer = 1f;
+        
         
         if( editPathMode )
         {
-            IntVec2 vec = floorCursor.transform.position.ToIntVec2();
+            IntVec2 vec = position.ToIntVec2();
             if( activePath.Count > 0 )
             {
                 IntVec2 last = activePath[activePath.Count-1]; 
                 float min = 1.42f;
-                float sqrMag = (last.ToVector3() - floorCursor.transform.position).sqrMagnitude;
+                float sqrMag = (last.ToVector3() - position).sqrMagnitude;
                 if( sqrMag > min*min )
                 {
                     activePath.Add(vec);
@@ -233,7 +232,7 @@ public class UICtrl : MonoBehaviour
         }
     }
     
-    public void ClickDown(Vector3 position)
+    public void LeftClickDown(Vector3 position)
     {
         bool clickOnFloorCursor = (position - floorCursor.transform.position).sqrMagnitude < 1.2f*1.2f;
         if( clickOnFloorCursor )
@@ -242,7 +241,11 @@ public class UICtrl : MonoBehaviour
         }
         floorCursor.SetDestination(position);
         floorCursor.body.gameObject.SetActive(true);
-        
+        floorCursorExpireTimer = 1f;
+    }
+    
+    public void ClickDown(Vector3 position)
+    {
         if( editPathMode )
         {
             //IntVec2 vec = activeCursor.transform.position.ToIntVec2();

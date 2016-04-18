@@ -223,7 +223,7 @@ public class ActorMotor : MonoBehaviour, IMotor
         else
         {
             actor.body.ApplyColor(Color.white);
-            actor.body.ApplyEmission(Color.white);
+            actor.body.ApplyEmission(Color.Lerp(Color.black, Color.white, 0.5f));
             possessTeamTimer = 2f;
         }
     }

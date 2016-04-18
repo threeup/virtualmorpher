@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public class User : MonoBehaviour
 {
@@ -81,6 +82,10 @@ public class User : MonoBehaviour
             case Referee.RefState.PLAYING:
                 if( isLocal )
                 {
+                    if(cockpit == null)
+                    {
+                        SelectNextActor();
+                    }
                     camCtrl.pointsOfInterest.Remove(Boss.referee.transform);
                     ProcessInput = PlayingInput;
                 } 
@@ -113,7 +118,6 @@ public class User : MonoBehaviour
     {
         CheckStickCursor(inputs);
         CheckSideSelect(inputs);
-        CheckSelectActor(inputs);
         return true;
     }
     
@@ -122,43 +126,13 @@ public class User : MonoBehaviour
     {
         CheckButtons(deltaTime, inputs);
         CheckStickCursor(inputs);
-        CheckSelectActor(inputs);
         return true;
     
     }
     
     void CheckSideSelect(InputCtrl.InputParams inputs)
     {
-        if( cockpit == null && inputs.button[0] )
-        {
-            desiredTeam = null;
-            if( floorCursor.transform.position.z < -1f )
-            {
-                desiredTeam = Boss.referee.northTeam;
-            }
-            else if( floorCursor.transform.position.z > 1f )
-            {
-                desiredTeam = Boss.referee.southTeam;
-            } 
-
-            if( !desiredTeam )
-            {
-                if( team )
-                {
-                    Action<bool> floaterSucess = success => JoinTeam(null);
-                    uiCtrl.ShowFloater(floorCursor.transform, 0, "Leave "+team+"?", floaterSucess);
-                }
-                else
-                {
-                    uiCtrl.HideFloater(floorCursor.transform, 0);
-                }
-            }
-            else if( desiredTeam != team )
-            {
-                Action<bool> floaterSucess = success => JoinTeam(desiredTeam);
-                uiCtrl.ShowFloater(floorCursor.transform, 0, "Join "+desiredTeam.teamName+"?", floaterSucess);
-            }
-        }
+        
     }
     
     public void JoinTeam(Team nextTeam)
@@ -198,10 +172,9 @@ public class User : MonoBehaviour
             if( directMode )
             {
                 cockpit.SetAxis(inputs.leftAxis);
-                
-            }
-            cockpit.DoButtons(deltaTime, inputs.button[2], inputs.button[3], inputs.button[4]);
+            }    
         }
+        DoButtons(deltaTime, inputs.button[2], inputs.button[3], inputs.button[4]);
     }
     
     void CheckStickCursor(InputCtrl.InputParams inputs)
@@ -210,28 +183,30 @@ public class User : MonoBehaviour
         {
             activeCursor.SetAxis(cockpit.transform.position - activeCursor.transform.position);
         }
-        floorCursor.SetAxis(stickCursor.transform.position - floorCursor.transform.position);
-        if( inputs.button[0] )
+        if( inputs.button[1] )
         {
             uiCtrl.ClickHeld(stickCursor.transform.position);
         }
-        if( inputs.buttonDown[0] )
+        if( inputs.buttonDown[1] )
         {
             uiCtrl.ClickDown(stickCursor.transform.position);
         }
-        if( inputs.buttonUp[0] )
+        if( inputs.buttonUp[1] )
         {
             uiCtrl.ClickUp(stickCursor.transform.position);
         }
-    }
-    
-    void CheckSelectActor(InputCtrl.InputParams inputs)
-    {
-        if( team && inputs.buttonDown[1] )
+        if( inputs.buttonDown[0] )
         {
-            SelectActor();
-            //Pawn lastCockpit = cockpit;
-            
+            SelectNearestActor(stickCursor.transform.position);
+            if( isLocal )
+            {
+                uiCtrl.SelectCockpit(cockpit);
+                camCtrl.keyInterest = cockpit != null ? cockpit.transform : null;
+            }
+        }
+        if( inputs.buttonDown[5] )
+        {
+            SelectNextActor();
             if( isLocal )
             {
                 uiCtrl.SelectCockpit(cockpit);
@@ -240,7 +215,43 @@ public class User : MonoBehaviour
         }
     }
     
-    public void SelectActor()
+    
+    public void SelectNearestActor(Vector3 pos)
+    {
+        float bestDistSqr = 999999;
+        Pawn bestPawn = null;
+        List<Pawn> pawns = Boss.actorWorld.activePawns;
+        if( team != null )
+        {
+            pawns = team.pawns;
+        }
+        foreach(Pawn p in pawns)
+        {
+            if( (p.transform.position - pos).sqrMagnitude < bestDistSqr )
+            {
+                bestDistSqr = (p.transform.position - pos).sqrMagnitude;
+                bestPawn = p;
+            }
+        }
+        if( bestPawn != null && team == null )
+        {
+            JoinTeam(bestPawn.team);
+        }
+        cockpit = bestPawn;
+        if( isLocal )
+        {
+            if( cockpit )
+            {
+                uiCtrl.LeftClickDown(cockpit.transform.position);
+            }
+            else
+            {
+                uiCtrl.LeftClickDown(pos);
+            }
+        }
+    }
+    
+    public void SelectNextActor()
     {
         if( cockpit == null )
         {
@@ -271,6 +282,21 @@ public class User : MonoBehaviour
             cockpit.path.Add(step);
         }
         cockpit.path.Add(vec);
+    }
+    
+    public void DoButtons(float deltaTime, bool primary, bool secondary, bool tertiary)
+    {
+        foreach(Pawn p in team.pawns)
+        {
+            if(p==cockpit)
+            {
+                p.DoButtons(deltaTime, primary, secondary, tertiary);
+            }
+            else
+            {
+                p.DoButtons(deltaTime, false, false, false);
+            }
+        }
     }
     
      
