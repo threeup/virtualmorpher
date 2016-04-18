@@ -94,6 +94,10 @@ public class ActorBody : MonoBehaviour
         {
             primaryMaterial.SetColor("_Color",color);
         }
+        if( secondaryMaterial )
+        {
+            secondaryMaterial.SetColor("_EmissionColor",Color.Lerp(Color.black, color, 0.5f));
+        }
     }
     
     public void ApplyEmission(Color color)
@@ -105,6 +109,10 @@ public class ActorBody : MonoBehaviour
         if( primaryMaterial )
         {
             primaryMaterial.SetColor("_EmissionColor",color);
+        }
+        if( secondaryMaterial )
+        {
+            secondaryMaterial.SetColor("_EmissionColor",Color.Lerp(Color.black, color, 0.5f));
         }
     }
     

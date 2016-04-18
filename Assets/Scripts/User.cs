@@ -253,6 +253,10 @@ public class User : MonoBehaviour
     
     public void SelectNextActor()
     {
+        if( team == null )
+        {
+            return;
+        }
         if( cockpit == null )
         {
             cockpit = team.alpha;
@@ -286,6 +290,10 @@ public class User : MonoBehaviour
     
     public void DoButtons(float deltaTime, bool primary, bool secondary, bool tertiary)
     {
+        if(!team)
+        {
+            return;
+        }
         foreach(Pawn p in team.pawns)
         {
             if(p==cockpit)

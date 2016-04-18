@@ -12,13 +12,13 @@ public class Boss
     public static MenuCtrl menuCtrl;
     public static Referee referee;
     
-    public static Pawn RequestPawn(string name, Team team, Pawn.PawnType ptype)
+    public static Pawn RequestPawn(string name, Team team, int idx, Pawn.PawnType ptype)
     {
-        return actorWorld.RequestPawn(name, team, ptype);
+        return actorWorld.RequestPawn(name, team, idx, ptype);
     }
-    public static Actor RequestTower(string name, Team team, bool giant)
+    public static Actor RequestTower(string name, Team team, int idx, bool giant)
     {
-        return actorWorld.RequestTower(name, team, giant);
+        return actorWorld.RequestTower(name, team, idx, giant);
     }
     public static Actor RequestActor(GameObject prototype, Transform origin = null, bool parented = false)
     {

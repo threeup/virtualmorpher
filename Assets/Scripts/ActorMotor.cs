@@ -111,7 +111,8 @@ public class ActorMotor : MonoBehaviour, IMotor
         
         float magn = diff.magnitude;
         float nextStep = magn;
-        nextStep = Mathf.Min(nextStep, currentTopSpeed*deltaTime);
+        float realTopSpeed = currentTopSpeed*Boss.referee.gameSpeed;
+        nextStep = Mathf.Min(nextStep, realTopSpeed*deltaTime);
         motorSpeed = nextStep/deltaTime;
         motorDirection = diff.normalized;  
         
@@ -217,13 +218,13 @@ public class ActorMotor : MonoBehaviour, IMotor
         possessTeam = team;
         if( team )
         {
-            actor.body.ApplyColor(Color.Lerp(Color.white, team.teamColor, 0.5f));
-            actor.body.ApplyEmission(Color.Lerp(Color.black, team.teamColor, 0.5f));
+            actor.body.ApplyColor(Color.Lerp(Color.gray, team.teamColor, 0.5f));
+            actor.body.ApplyEmission(Color.Lerp(Color.black, team.teamColor, 0.4f));
         }
         else
         {
             actor.body.ApplyColor(Color.white);
-            actor.body.ApplyEmission(Color.Lerp(Color.black, Color.white, 0.5f));
+            actor.body.ApplyEmission(Color.Lerp(Color.black, Color.white, 0.4f));
             possessTeamTimer = 2f;
         }
     }

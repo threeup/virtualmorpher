@@ -37,7 +37,7 @@ public class GameFactory : MonoBehaviour
         ga.abName = 'B';
         ga.Charge = BulletCharge;
         ga.Activate = BulletActivate;
-        ga.Cooldown = ThreeSecond;
+        ga.Cooldown = TwoSecond;
         
     }
     
@@ -62,7 +62,7 @@ public class GameFactory : MonoBehaviour
     
     public static void OneSecond(GameAbility ga)
 	{
-		ga.lockTime = 2f;
+		ga.lockTime = 1f;
 	}
     
     public static void TwoSecond(GameAbility ga)
@@ -139,7 +139,13 @@ public class GameFactory : MonoBehaviour
         if( otherMotor.possessTeam != null && 
             otherMotor.possessTeam != src.owner.team )
         {
-            src.owner.team.ExplodeTower(src.owner);
+            
+            src.owner.TakeDamage(1);
+            if( other.owner.motor.possessActor != null )
+            {
+                other.owner.motor.Possess(null, null);
+                other.owner.motor.SetPossessionLock(true);
+            }
         }
         
         Vector3 bounceOut = Vector3.up*10f-src.transform.position;
@@ -178,6 +184,7 @@ public class GameFactory : MonoBehaviour
     {
         float bounceAway = 2f;
         ActorMotor otherMotor = other.owner.motor;
+        other.owner.TakeDamage(1);
         otherMotor.RigidAdd(diff.normalized*bounceAway);
     }
     public static void ShieldBounce(Limb src, Limb other, Vector3 diff)

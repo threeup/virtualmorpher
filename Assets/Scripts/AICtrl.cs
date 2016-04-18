@@ -6,11 +6,11 @@ public class AICtrl : MonoBehaviour
 {
     User user;
     
-    float newPawnTimer = 2f;
-    float defaultNewPawnTimer = 2f;
+    float newPawnTimer = 1f;
+    float defaultNewPawnTimer = 1f;
     
-    float pathTimer = 2f;
-    float defaultPathTimer = 2f;
+    float pathTimer = 0.4f;
+    float defaultPathTimer = 0.4f;
     
     float actionTimer = 2f;
     float defaultActionTimer = 2f;
@@ -41,7 +41,10 @@ public class AICtrl : MonoBehaviour
         pathTimer -= deltaTime;
         if( pathTimer < 0 )
         {
-            user.MakePath(GetDestination(user.cockpit));
+            if( user.cockpit )
+            {
+                user.MakePath(GetDestination(user.cockpit));
+            }
             pathTimer = defaultPathTimer;
         }
         
@@ -62,18 +65,46 @@ public class AICtrl : MonoBehaviour
     
     Vector3 GetDestination(Pawn pawn)
     {
-        int rand = UnityEngine.Random.Range(0,6);
+        Actor orb = Boss.referee.orb;
+        float bestDistSqr = 999999;
+        Pawn bestPawn = null;
+        Team team = pawn.team;
+        foreach(Pawn p in team.pawns)
+        {
+            if( (p.transform.position - orb.transform.position).sqrMagnitude < bestDistSqr )
+            {
+                bestDistSqr = (p.transform.position - orb.transform.position).sqrMagnitude;
+                bestPawn = p;
+            }
+        }
+        if( bestPawn == this )
+        {
+            return orb.transform.position;
+        }
+        Vector3 pos = team.GetPawnCoveragePosition(pawn.idx);
+        if( orb.motor.possessTeam == team )
+        {
+            pos += team.transform.forward*3;
+            pos.z *= 1.2f;
+        }
+        else if(orb.motor.possessTeam != null )
+        {
+            if(pawn.idx != 1 )
+            {
+                pos -= team.transform.forward*3;
+                pos.z *= 0.8f;
+            }
+        }
+        int rand = UnityEngine.Random.Range(0,3);
         switch(rand)
         {
             default:
-            case 0: return Vector3.zero;
-            case 1: return Vector3.right*5;
-            case 2: return Vector3.right*5+Vector3.forward*5;
-            case 3: return Vector3.right*5-Vector3.forward*5;
-            case 4: return -Vector3.right*5-Vector3.forward*5;
-            case 5: return -Vector3.right*5+Vector3.forward*5;
-            case 6: return -Vector3.right;
+            case 0: return pos+Vector3.zero;
+            case 1: return pos+team.transform.forward*3;
+            case 2: return pos+team.transform.right*3;
+            case 3: return pos-team.transform.right*3;
         }
+        
     }
     
 }

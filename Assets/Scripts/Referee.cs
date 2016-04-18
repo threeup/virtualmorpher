@@ -31,6 +31,8 @@ public class Referee : MonoBehaviour {
     
     float defaultAdvanceTimer = 0.2f;
     
+    public float gameSpeed = 1f;
+    
     void Awake()
     {
         Boss.referee = this;
@@ -85,6 +87,7 @@ public class Referee : MonoBehaviour {
                         user.AssignCamera(null);
                     }
                 }
+                SetAutoReadyTimer(10f);
                 Boss.menuCtrl.GoSideSelect(true);
                 Boss.menuCtrl.GoEndOfGame(false);
                 break;
@@ -106,7 +109,7 @@ public class Referee : MonoBehaviour {
                 southTeam.isReady = false;
                 Boss.AddGarbage(orb.gameObject);
                 orb = null;
-                SetAutoReadyTimer(5f);
+                SetAutoReadyTimer(10f);
                 break;   
             case RefState.FINISHED:
                 northTeam.isReady = false;

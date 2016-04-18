@@ -29,9 +29,9 @@ public class ActorWorld : MonoBehaviour {
 	    Boss.actorWorld = this;
 	}
     
-    public Pawn RequestPawn(string name, Team team, Pawn.PawnType ptype)
+    public Pawn RequestPawn(string name, Team team, int idx, Pawn.PawnType ptype)
     {
-        GameObject pawnObject = GameObject.Instantiate(pawnPrototype, team.GetPawnSpawnPosition(), team.GetSpawnRotation()) as GameObject;
+        GameObject pawnObject = GameObject.Instantiate(pawnPrototype, team.GetPawnSpawnPosition(idx), team.GetSpawnRotation()) as GameObject;
         pawnObject.name = name;
         Pawn pawn = pawnObject.GetComponent<Pawn>();
         pawn.team = team;
@@ -50,13 +50,14 @@ public class ActorWorld : MonoBehaviour {
             pawn.body.transform.SetParent(pawn.transform, false);
         }
         pawn.body.ApplyColor(team.teamColor);
+        pawn.idx = idx;
         pawn.GoAlive();
         return pawn;
     }
     
-    public Actor RequestTower(string name, Team team, bool giant)
+    public Actor RequestTower(string name, Team team, int idx, bool giant)
     {
-        Vector3 spawnPos = giant ? team.transform.position : team.GetTowerSpawnPosition();
+        Vector3 spawnPos = giant ? team.transform.position : team.GetTowerSpawnPosition(idx);
         GameObject towerObject = GameObject.Instantiate(towerPrototype, spawnPos, team.GetSpawnRotation()) as GameObject;
         towerObject.name = name;
         Actor actor = towerObject.GetComponent<Actor>();

@@ -24,6 +24,9 @@ public class Pawn : Actor
     public List<IntVec2> path;
     public VectorLine line;
     
+    public int idx; 
+    
+    
     public override void Awake()
     {
         GameAbility[] abs = GetComponents<GameAbility>();
@@ -91,6 +94,7 @@ public class Pawn : Actor
     
     public void UpdateMotion(float deltaTime)
     {    
+        
         if( path != null )
         {
             IntVec2 vec = motor.transform.position.ToIntVec2();
@@ -114,6 +118,7 @@ public class Pawn : Actor
             
         }
     }
+    
     
     
 }

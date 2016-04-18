@@ -7,11 +7,24 @@ public class Actor : MonoBehaviour
     public Team team;
     GameObject hat;
     
+    
+    public int health = 5;
+    float damageImmuneTimer = -1f;
+    
     public float GetSpeed() { return motor.GetSpeed(); }
     
     public virtual void Awake()
     {
         motor = GetComponent<ActorMotor>();
+    }
+    
+    void Update()
+    {
+        float deltaTime = Time.deltaTime;
+        if( damageImmuneTimer > 0f )
+        {
+            damageImmuneTimer -= deltaTime;
+        }
     }
     
     public virtual void GoAlive()
@@ -75,6 +88,20 @@ public class Actor : MonoBehaviour
         hat.transform.parent = body.head;
         hat.transform.localPosition = Vector3.up*0.5f;
     }
-    
+
+
+    public void TakeDamage(int dmg)
+    {
+        if( !team || damageImmuneTimer > 0f)
+        {
+            return;
+        }
+        health -= dmg;
+        damageImmuneTimer = 4f;
+        if( health == 0 )
+        {
+            team.DieAndReplace(this);
+        }
+    }    
 
 }

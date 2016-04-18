@@ -30,17 +30,22 @@ public class Team : MonoBehaviour
         spawnRotation = this.transform.rotation;
         ProcessUpdate = NoUpdate;
     }
-    public Vector3 GetPawnSpawnPosition()
+    public Vector3 GetPawnSpawnPosition(int idx)
     {
-        Vector3 result = spawnPosition;
-        spawnPosition += Vector3.right*5f;
-        return result;
+        return spawnPosition + (idx-1)*Vector3.right*5f;
     }
-    public Vector3 GetTowerSpawnPosition()
+    public Vector3 GetPawnCoveragePosition(int idx)
     {
-        Vector3 result = towerSpawnPosition;
-        towerSpawnPosition += Vector3.right*5f;
-        return result;
+        if( idx == 1 )
+        {
+            return spawnPosition + this.transform.forward*5f;    
+        }
+        float factor = idx == 0 ? -1 : 1;
+        return spawnPosition + this.transform.forward*13f+Vector3.right*4f*factor;  
+    }
+    public Vector3 GetTowerSpawnPosition(int idx)
+    {
+        return towerSpawnPosition + idx*Vector3.right*5f;
     }
     
     public Quaternion GetSpawnRotation()
@@ -55,20 +60,20 @@ public class Team : MonoBehaviour
         {
             case Referee.RefState.ROUNDSTART:
                 score = 0;
-                spawnPosition = this.transform.position - Vector3.right*5f;
+                spawnPosition = this.transform.position;
                 spawnPosition.z *= 0.5f;
                 towerSpawnPosition = this.transform.position - Vector3.right*5f;
                 towerSpawnPosition.z *= 0.8f;
                 isReady = true;
                 break;
             case Referee.RefState.SPAWNING:
-                alpha = Boss.RequestPawn("PawnA",this, Pawn.PawnType.FAT);
+                alpha = Boss.RequestPawn("PawnA",this, 0, Pawn.PawnType.FAT);
                 alpha.SetHat(Boss.RequestHat());
                 pawns.Add(alpha);
-                bravo = Boss.RequestPawn("PawnB",this, Pawn.PawnType.TALL);
+                bravo = Boss.RequestPawn("PawnB",this, 1, Pawn.PawnType.TALL);
                 bravo.SetHat(Boss.RequestHat());
                 pawns.Add(bravo);
-                charlie = Boss.RequestPawn("PawnC",this, Pawn.PawnType.MED);
+                charlie = Boss.RequestPawn("PawnC",this, 2, Pawn.PawnType.MED);
                 charlie.SetHat(Boss.RequestHat());
                 pawns.Add(charlie);
                 isReady = true;
@@ -80,11 +85,11 @@ public class Team : MonoBehaviour
             case Referee.RefState.COUNTDOWN:
                 for(int i=0; i<3; ++i)
                 {
-                     Actor tower = Boss.RequestTower(teamName+" Tower"+i, this, false);
+                     Actor tower = Boss.RequestTower(teamName+" Tower"+i, this, i, false);
                      tower.body.ApplyColor(teamColor);
                      towers.Add(tower);
                 }
-                Actor giantTower = Boss.RequestTower(teamName+" Home", this, true);
+                Actor giantTower = Boss.RequestTower(teamName+" Home", this, 0, true);
                 giantTower.body.ApplyColor(teamColor);
                 towers.Add(giantTower);
                 
@@ -119,7 +124,7 @@ public class Team : MonoBehaviour
     {
         users.Add(user);
         isReady = true;
-        Boss.referee.SetAutoReadyTimer(5f);
+        Boss.referee.SetAutoReadyTimer(3f);
         Boss.referee.TempFloater(user+" Joined "+this.teamName);
     }
     
@@ -197,6 +202,45 @@ public class Team : MonoBehaviour
         }
         Boss.AddGarbage(actor.gameObject);
         
+    }
+    
+    public void DieAndReplace(Actor actor)
+    {
+        bool isTower = ExplodeTower(actor);
+        if(!isTower)
+        {
+            Pawn removedPawn = actor as Pawn;
+            pawns.Remove(removedPawn);
+            Explode(removedPawn);
+            Pawn nextPawn = null;
+            if( removedPawn.idx == 0 )
+            {
+                alpha = Boss.RequestPawn("PawnA",this, 0, Pawn.PawnType.FAT);
+                nextPawn = alpha;
+            }
+            if( removedPawn.idx == 1 )
+            {
+                bravo = Boss.RequestPawn("PawnB",this, 1, Pawn.PawnType.FAT);
+                nextPawn = charlie;
+            }
+            if( removedPawn.idx == 2 )
+            {
+                charlie = Boss.RequestPawn("PawnC",this, 2, Pawn.PawnType.FAT);
+                nextPawn = charlie;
+            }
+            foreach(User u in users)
+            {
+                if (u.cockpit == removedPawn)
+                {
+                    u.cockpit = nextPawn;
+                }
+            }
+            if(nextPawn)
+            {
+                nextPawn.SetHat(Boss.RequestHat());
+                pawns.Add(nextPawn);
+            }
+        }
     }
     
 }
