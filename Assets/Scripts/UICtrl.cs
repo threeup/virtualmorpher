@@ -46,6 +46,8 @@ public class UICtrl : MonoBehaviour
 	    camCtrl = this.GetComponent<CamCtrl>();
 	    cam = this.GetComponent<Camera>();
         GameObject go;
+        hudcanvas.gameObject.SetActive(true);
+        hudcanvas.transform.localScale = Vector3.one;
         for(int i=0; i<8;++i)
         {
             go = Boss.RequestObject(this.floaterPrototype);
@@ -56,11 +58,11 @@ public class UICtrl : MonoBehaviour
             floater.uiCtrl = this;
             floaters.Add(floater);
         }
-        
         go = Boss.RequestObject(this.upIconPrototype);
         go.name = "UpIcon";
         go.transform.SetParent(hudcanvas.transform);
         go.SetActive(false);
+        
         iconPri = go.GetComponent<FloatIcon>();
         iconPri.offset = -35;
         iconPri.uiCtrl = this;
@@ -103,7 +105,6 @@ public class UICtrl : MonoBehaviour
         grid.Draw3DAuto();
         
         Boss.uiCtrls.Add(this);
-        hudcanvas.gameObject.SetActive(true);
 	}
     
     void Start()

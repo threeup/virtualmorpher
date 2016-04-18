@@ -70,23 +70,6 @@ public class FloatIcon : MonoBehaviour
         }
     }
     
-    public void SetDoubleScale(bool val)
-    {
-           if(val == doubled)
-           {
-               return;
-           }
-           doubled = val;
-           if( doubled )
-           {
-               offset *= 2;
-               this.transform.localScale *= 2;
-           }
-           else
-           {
-               offset *= 0.5f;
-               this.transform.localScale *= 0.5f;
-           }
-    }
+    
     
 }

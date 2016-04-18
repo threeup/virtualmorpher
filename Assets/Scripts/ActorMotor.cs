@@ -219,12 +219,12 @@ public class ActorMotor : MonoBehaviour, IMotor
         if( team )
         {
             actor.body.ApplyColor(Color.Lerp(Color.gray, team.teamColor, 0.5f));
-            actor.body.ApplyEmission(Color.Lerp(Color.black, team.teamColor, 0.4f));
+            actor.body.ApplyEmission(Color.Lerp(Color.black, team.teamColor, 0.2f));
         }
         else
         {
             actor.body.ApplyColor(Color.white);
-            actor.body.ApplyEmission(Color.Lerp(Color.black, Color.white, 0.4f));
+            actor.body.ApplyEmission(Color.Lerp(Color.black, Color.white, 0.2f));
             possessTeamTimer = 2f;
         }
     }
