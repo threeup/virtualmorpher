@@ -62,7 +62,7 @@ public class UICtrl : MonoBehaviour
         go.transform.SetParent(hudcanvas.transform);
         go.SetActive(false);
         iconPri = go.GetComponent<FloatIcon>();
-        iconPri.offset = -20;
+        iconPri.offset = -35;
         iconPri.uiCtrl = this;
         
         go = Boss.RequestObject(this.fastIconPrototype);
@@ -77,7 +77,7 @@ public class UICtrl : MonoBehaviour
         go.transform.SetParent(hudcanvas.transform);
         go.SetActive(false);
         iconTer = go.GetComponent<FloatIcon>();
-        iconTer.offset = 20;
+        iconTer.offset = 35;
         iconTer.uiCtrl = this;
         
         int linesX = 9;
@@ -274,9 +274,9 @@ public class UICtrl : MonoBehaviour
             iconPri.target = activePawn.body.head;
             iconPri.targetAbility = activePawn.leftHandAbility; 
             iconSec.target = activePawn.body.head;
-            iconSec.targetAbility = activePawn.rightHandAbility;
+            iconSec.targetAbility = activePawn.wheelAbility;
             iconTer.target = activePawn.body.head;
-            iconTer.targetAbility = activePawn.wheelAbility;
+            iconTer.targetAbility = activePawn.rightHandAbility;
             if( activePawn != null && activePawn.line != null )
             {
                 Color lc = activePawn.line.color;

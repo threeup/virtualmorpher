@@ -32,10 +32,15 @@ public class Cheats : MonoBehaviour
         camctrl.zoomPadding = 4f*(0.3f+factor*2);
         camctrl.minZoom = 8f*(0.1f+factor*2);
         camctrl.maxZoom = 15f*(0.1f+factor*2);
+        
+    }
+    
+    public void SetDouble(bool val)
+    {
         FloatIcon[] fis = FindObjectsOfType(typeof(FloatIcon)) as FloatIcon[];
         foreach(FloatIcon fi in fis)
         {
-            fi.SetDoubleScale( factor > 0.5f );
+            fi.SetDoubleScale( val );
         }
     }
 }

@@ -33,11 +33,11 @@ public class Pawn : Actor
         }
         if( abs.Length > 1 )
         {
-            rightHandAbility = abs[1];
+            wheelAbility = abs[1];
         }
         if( abs.Length > 2 )
         {
-            wheelAbility = abs[2];
+            rightHandAbility = abs[2];
         }
         base.Awake();
     }
@@ -79,13 +79,13 @@ public class Pawn : Actor
         {
             leftHandAbility.ActionUpdate(deltaTime, primary);
         }
-        if( rightHandAbility )
-        {
-            rightHandAbility.ActionUpdate(deltaTime, secondary);
-        }
         if( wheelAbility )
         {
-            wheelAbility.ActionUpdate(deltaTime, tertiary);
+            wheelAbility.ActionUpdate(deltaTime, secondary);
+        }
+        if( rightHandAbility )
+        {
+            rightHandAbility.ActionUpdate(deltaTime, tertiary);
         }
     }
     
