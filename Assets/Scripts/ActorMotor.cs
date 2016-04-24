@@ -216,14 +216,15 @@ public class ActorMotor : MonoBehaviour, IMotor
             return;
         }
         possessTeam = team;
+        Color baseColor = new Color(1f,1f,0.6f,1f);
         if( team )
         {
-            actor.body.ApplyColor(Color.Lerp(Color.gray, team.teamColor, 0.5f));
+            actor.body.ApplyColor(Color.Lerp(baseColor, team.teamColor, 0.2f));
             actor.body.ApplyEmission(Color.Lerp(Color.black, team.teamColor, 0.2f));
         }
         else
         {
-            actor.body.ApplyColor(Color.white);
+            actor.body.ApplyColor(baseColor);
             actor.body.ApplyEmission(Color.Lerp(Color.black, Color.white, 0.2f));
             possessTeamTimer = 2f;
         }

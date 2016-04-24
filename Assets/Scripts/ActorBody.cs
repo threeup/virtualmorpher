@@ -29,6 +29,7 @@ public class ActorBody : MonoBehaviour
     Material primaryMaterial;
     Material secondaryMaterial;
     public List<Renderer> secondary = new List<Renderer>();
+    public List<Renderer> excluded = new List<Renderer>();
     
     void Start()
     {
@@ -45,7 +46,11 @@ public class ActorBody : MonoBehaviour
         {
             for(int i=0; i<renderers.Length; ++i)
             {
-                if( secondary.Contains(renderers[i]) )
+                if( excluded.Contains(renderers[i]) )
+                {
+                    
+                }
+                else if( secondary.Contains(renderers[i]) )
                 {
                     if( secondaryMaterial == null )
                     {

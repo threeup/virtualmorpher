@@ -132,6 +132,7 @@ public class UICtrl : MonoBehaviour
         if( floorCursorExpireTimer > 0 )
         {
             floorCursorExpireTimer -= Time.deltaTime;
+            floorCursor.body.gameObject.transform.localScale = Vector3.one*(0.5f+0.5f*floorCursorExpireTimer);
             if( floorCursorExpireTimer <= 0f )
             {
                 floorCursor.body.gameObject.SetActive(false);
@@ -241,6 +242,7 @@ public class UICtrl : MonoBehaviour
             ClickFloater(floorCursor.transform);
         }
         floorCursor.SetDestination(position);
+        floorCursor.body.gameObject.transform.localScale = Vector3.one;
         floorCursor.body.gameObject.SetActive(true);
         floorCursorExpireTimer = 1f;
     }

@@ -24,6 +24,7 @@ public class Referee : MonoBehaviour {
     public List<User> users = new List<User>();
     public Transform orbDropPoint;
     public Actor orb;
+    public Follower spotLight;
     
     float autoReadyTimer = -1f;
     float tempFloaterTimer = -1f;
@@ -101,6 +102,7 @@ public class Referee : MonoBehaviour {
                 northTeam.AddAI();
                 southTeam.AddAI();
                 orb = Boss.RequestActor(Boss.actorWorld.orbPrototype, orbDropPoint, false);
+                spotLight.target = orb.transform;
                 isReady = true;
                 break; 
             case RefState.RESETGAME:
@@ -109,6 +111,7 @@ public class Referee : MonoBehaviour {
                 southTeam.isReady = false;
                 Boss.AddGarbage(orb.gameObject);
                 orb = null;
+                spotLight.target = null;
                 SetAutoReadyTimer(10f);
                 break;   
             case RefState.FINISHED:
